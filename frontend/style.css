@@ -7,3 +7,9 @@ body{margin:0;padding:20px;font:14px system-ui;background:#fff;color:#333}#weath
 #weather-map [data-weather-info]{font-size:13px;color:#555;line-height:1.6}
 #weather-map [data-weather-rows]{padding-left:20px}
 #weather-map [data-local-hint]{color:#555}
+
+#weather-map [data-weather-details]{margin:16px 0;border-top:1px solid #ddd;padding-top:12px}
+#weather-map summary{cursor:pointer;font-weight:600}
+#weather-map [data-weather-explanations]{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px 24px}
+#weather-map [data-weather-explanations] h3{font-size:14px;margin:12px 0 6px}
+#weather-map [data-weather-explanations] p{margin:4px 0;overflow-wrap:anywhere}

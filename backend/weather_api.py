@@ -68,7 +68,7 @@ class WeatherService:
                 data = deepcopy(self.cache.get(key))
                 if data is None:
                     data = {field: None for field in FIELDS}
-                    data.update(effect="neutral", data_time=None, fetched_at=None,
+                    data.update(effect="neutral", effect_reason="Погодные данные недоступны. Показана обычная надпись.", data_time=None, fetched_at=None,
                                 precipitation_interval_seconds=None, missing_fields=list(FIELDS))
                     status = "unavailable"
                 else:

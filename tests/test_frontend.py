@@ -174,3 +174,116 @@ def test_file_demo(browser_site):
         expect(page.locator("[data-local-hint]")).to_be_visible()
     finally:
         page.close()
+
+def test_weather_explanation_panel(page):
+    from playwright.sync_api import expect
+    data = weather()
+    data["cities"][2].update(
+        effect="sun", wind_speed_kmh=8.4, wind_direction_deg=137,
+        cloud_cover_pct=8, precipitation_mm=0, rain_mm=0, showers_mm=0,
+        snowfall_cm=0, precipitation_interval_seconds=900, weather_code=2, is_day=1,
+        effect_reason="День, код погоды 2, облачность 8% не выше 60%, осадки отсутствуют.")
+    page.route("**/api/weather", lambda route: route.fulfill(json=data))
+    page.locator("[data-mode]").select_option("live")
+    expect(page.locator("[data-status]")).to_contain_text("обновление раз")
+    panel = page.locator("[data-weather-details]")
+    assert not panel.evaluate("(node)=>node.open")
+    panel.locator("summary").click()
+    city = panel.locator("section").nth(2)
+    expect(city).to_contain_text("Raris")
+    expect(city).to_contain_text("8,4 км/ч")
+    expect(city).to_contain_text("15 мин")
+    expect(city).to_contain_text("облачность 8% не выше 60%")
+    expect(panel.locator("section").first).to_contain_text("нет данных")
+    data["cities"][2]["status"] = "stale"
+    page.clock.fast_forward(600000)
+    expect(city).to_contain_text("Последние доступные данные")
+    assert panel.evaluate("(node)=>node.open")
+    page.locator("[data-mode]").select_option("demo")
+    expect(panel).to_be_hidden()
+
+def test_live_intensity_updates_without_effect_change(page):
+    from playwright.sync_api import expect
+    data = weather(("neutral","neutral","wind","sun"))
+    data["cities"][2]["wind_speed_kmh"] = 18
+    data["cities"][3]["cloud_cover_pct"] = 0
+    page.route("**/api/weather", lambda route: route.fulfill(json=data))
+    page.locator("[data-mode]").select_option("live")
+    expect(page.locator("[data-status]")).to_contain_text("обновление раз")
+    page.locator("[data-pause]").click()
+    # Observe actual Canvas calls, without exposing application internals.
+    page.evaluate("""()=>{
+      window.visualProbe={wind:[],clouds:0};
+      const proto=CanvasRenderingContext2D.prototype;
+      const draw=proto.drawImage, gradient=proto.createRadialGradient;
+      const fill=proto.fillRect;
+      proto.fillRect=function(...args){
+        if(this.canvas===document.querySelector('canvas')&&args[2]===1100)
+          window.visualProbe={wind:[],clouds:0};
+        return fill.apply(this,args);
+      };
+      proto.drawImage=function(...args){
+        if(this.canvas===document.querySelector('canvas')&&args.length===9&&args[4]===1)
+          window.visualProbe.wind.push(args[5]);
+        return draw.apply(this,args);
+      };
+      proto.createRadialGradient=function(...args){
+        window.visualProbe.clouds++;
+        return gradient.apply(this,args);
+      };
+    }""")
+    page.clock.run_for(50)
+    weak=page.evaluate("Math.max(...visualProbe.wind)")
+    assert weak>0
+    assert page.evaluate("visualProbe.clouds")==0
+    data["cities"][2]["wind_speed_kmh"]=36
+    data["cities"][3]["cloud_cover_pct"]=36
+    with page.expect_response("**/api/weather"):
+        page.clock.fast_forward(600000)
+    expect(page.locator("[data-weather-explanations]")).to_contain_text("36 %")
+    page.clock.run_for(50)
+    strong=page.evaluate("Math.max(...visualProbe.wind)")
+    assert strong==pytest.approx(weak*2)
+    assert page.evaluate("visualProbe.clouds")==7*3
+    data["cities"][2]["wind_speed_kmh"]=200
+    data["cities"][3]["cloud_cover_pct"]=60
+    with page.expect_response("**/api/weather"):
+        page.clock.fast_forward(600000)
+    expect(page.locator("[data-weather-explanations]")).to_contain_text("60 %")
+    page.clock.run_for(50)
+    assert page.evaluate("Math.max(...visualProbe.wind)")==pytest.approx(weak*4)
+    assert page.evaluate("visualProbe.clouds")==12*3
+    page.locator("[data-mode]").select_option("demo")
+    page.clock.run_for(50)
+    assert page.evaluate("visualProbe.clouds")==10*3
+
+def test_cloudy_grey_letters_and_moving_dark_clouds(page):
+    from playwright.sync_api import expect
+    data = weather(("cloudy",)*4)
+    for city in data["cities"]:
+        city["cloud_cover_pct"]=80
+    page.route("**/api/weather", lambda route: route.fulfill(json=data))
+    page.locator("[data-mode]").select_option("live")
+    expect(page.locator("canvas")).to_have_attribute("aria-label", "Dublin: пасмурно; Helsinki: пасмурно; Raris: пасмурно; Madrid: пасмурно")
+    page.clock.run_for(100)
+    pixels=page.locator("canvas").evaluate("""c=>{
+      const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+      let grey=0,dark=0,coloured=0;
+      for(let i=0;i<d.length;i+=4){
+        if(d[i]===153&&d[i+1]===153&&d[i+2]===153)grey++;
+        if(d[i]<130&&d[i]===d[i+1]&&d[i]===d[i+2])dark++;
+        if(Math.max(d[i],d[i+1],d[i+2])-Math.min(d[i],d[i+1],d[i+2])>5)coloured++;
+      }
+      return {grey,dark,coloured};
+    }""")
+    assert pixels["grey"]>1000
+    assert pixels["dark"]>1000
+    assert pixels["coloured"]==0
+    before=page.locator("canvas").evaluate("(c)=>c.toDataURL()")
+    page.clock.run_for(1000)
+    assert before!=page.locator("canvas").evaluate("(c)=>c.toDataURL()")
+    page.locator("[data-pause]").click()
+    page.clock.run_for(50)
+    paused=page.locator("canvas").evaluate("(c)=>c.toDataURL()")
+    page.clock.run_for(500)
+    assert paused==page.locator("canvas").evaluate("(c)=>c.toDataURL()")

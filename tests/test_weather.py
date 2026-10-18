@@ -27,8 +27,8 @@ def payload(**changes):
     ({}, "sun"), ({"snowfall": 0.1, "rain": 1, "wind_speed_10m": 40}, "snow"),
     ({"weather_code": 85}, "snow"), ({"rain": 0.1, "wind_speed_10m": 40}, "rain"),
     ({"weather_code": 61}, "rain"), ({"wind_speed_10m": 25}, "wind"),
-    ({"wind_speed_10m": 24.9}, "sun"), ({"cloud_cover": 30}, "sun"),
-    ({"cloud_cover": 30.1}, "neutral"), ({"weather_code": 3}, "neutral"),
+    ({"wind_speed_10m": 17.9}, "sun"), ({"cloud_cover": 30}, "sun"),
+    ({"cloud_cover": 60.1}, "cloudy"), ({"weather_code": 3, "cloud_cover": 100}, "cloudy"),
     ({"is_day": 0}, "neutral"), ({"is_day": None}, "neutral"),
     ({"weather_code": 45}, "neutral"), ({"precipitation": None}, "neutral"),
     ({"weather_code": None}, "neutral"), ({"precipitation": 1}, "neutral"),
@@ -131,3 +131,68 @@ def test_returned_values_cannot_mutate_cache():
     result = service.get_weather()
     result["cities"][0]["effect"] = "snow"
     assert service.get_weather()["cities"][0]["effect"] == "sun"
+
+@pytest.mark.parametrize("changes,effect,fragment", [
+    ({"weather_code":2,"cloud_cover":4}, "sun", "код погоды 2"),
+    ({"weather_code":1,"cloud_cover":36}, "sun", "облачность 36% не выше 60%"),
+    ({"rain":0.3,"wind_speed_10m":25.6}, "rain", "приоритет над ветром"),
+    ({"snowfall":0.1,"rain":0.3}, "snow", "приоритет над дождём"),
+    ({"wind_speed_10m":18}, "wind", "порога 5 м/с"),
+    ({}, "sun", "осадки отсутствуют"),
+    ({"is_day":0}, "neutral", "ночью"),
+    ({"precipitation":None}, "neutral", "недостаточно"),
+])
+def test_effect_reason(changes, effect, fragment):
+    result = normalize(payload(**changes))
+    assert result["effect"] == effect
+    assert fragment in result["effect_reason"]
+
+
+def test_reason_survives_cache_failure():
+    failed = [False]
+    ticks = [0]
+    def fetch(city):
+        if failed[0]:
+            raise TimeoutError()
+        return payload(rain=0.3)
+    service = WeatherService(fetch, lambda: ticks[0], lambda: NOW)
+    initial = service.get_weather()["cities"][0]
+    failed[0] = True
+    ticks[0] = CACHE_SECONDS
+    stale = service.get_weather()["cities"][0]
+    assert stale["status"] == "stale"
+    assert stale["effect_reason"] == initial["effect_reason"]
+
+@pytest.mark.parametrize("changes,effect", [
+    ({"weather_code":2,"cloud_cover":60,"wind_speed_10m":17.99}, "sun"),
+    ({"weather_code":2,"cloud_cover":60.01}, "cloudy"),
+    ({"wind_speed_10m":18}, "wind"),
+    ({"wind_speed_10m":18,"rain":0.1}, "rain"),
+    ({"weather_code":2,"cloud_cover":4,"is_day":0}, "neutral"),
+    ({"weather_code":45,"cloud_cover":4}, "neutral"),
+])
+def test_updated_threshold_boundaries(changes, effect):
+    assert normalize(payload(**changes))["effect"] == effect
+
+@pytest.mark.parametrize("cloud,day,rain,wind,effect", [
+    (39, 1, 0, 1.9, "sun"),
+    (60, 1, 0, 1.9, "sun"),
+    (60.1, 1, 0, 1.9, "cloudy"),
+    (39, 0, 0, 1.9, "neutral"),
+    (39, 1, 0.1, 1.9, "rain"),
+    (39, 1, 0, 18, "wind"),
+])
+def test_madrid_cloud_code_does_not_override_cover(cloud, day, rain, wind, effect):
+    result = normalize(payload(weather_code=3, cloud_cover=cloud, is_day=day,
+                               rain=rain, precipitation=rain, wind_speed_10m=wind))
+    assert result["effect"] == effect
+
+@pytest.mark.parametrize("changes,effect", [
+    ({"cloud_cover":61,"is_day":0}, "cloudy"),
+    ({"cloud_cover":90,"rain":0.1}, "rain"),
+    ({"cloud_cover":90,"snowfall":0.1}, "snow"),
+    ({"cloud_cover":90,"wind_speed_10m":18}, "wind"),
+    ({"cloud_cover":None}, "neutral"),
+])
+def test_cloudy_priority(changes, effect):
+    assert normalize(payload(**changes))["effect"] == effect

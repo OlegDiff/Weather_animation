@@ -57,8 +57,8 @@ Do not create unused placeholders merely to match this tree. Adopt the structure
 
 ## Weather-to-effect contract
 
-- Internal effect names: `rain`, `snow`, `wind`, `sun`, `neutral`.
-- A single primary effect is selected per city at first; `neutral` means no active animation, not a fifth weather animation.
+- Internal effect names: `rain`, `snow`, `wind`, `sun`, `cloudy`, `neutral`.
+- A single primary effect is selected per city at first; `neutral` means no active animation, not an active weather animation. The user-approved cloudy effect uses grey letters with moving dark grey clouds above 60% cloud cover; snow, rain and wind take precedence. Preserve the original four-effect demo sequence.
 - Prefer snow over rain when snow is actually occurring; do not classify overcast conditions as sunny simply because there is no rain or wind.
 - Support intensity/direction parameters where available (e.g., precipitation, wind speed/direction, cloud cover), but keep the frontend resilient to missing optional fields.
 - Document and test the precise weather classification thresholds when implemented; do not silently invent scientifically justified thresholds.
