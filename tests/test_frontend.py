@@ -53,7 +53,7 @@ def page(browser_site):
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.clock.install()
-    page.goto(url)
+    page.goto(url + "/legacy/")
     yield page
     context.close()
     assert not errors
@@ -97,7 +97,7 @@ def test_live_mapping_cache_failure_and_return(page):
             data = weather()
             data["cities"].reverse()  # Mapping must use IDs, not list order.
             route.fulfill(json=data)
-    page.route("**/api/weather", respond)
+    page.route("**/api/weather?map=legacy", respond)
     page.locator("[data-mode]").select_option("live")
     expect(page.locator("[data-status]")).to_contain_text("обновление раз")
     expect(page.locator("[data-next]")).to_be_disabled()
@@ -122,7 +122,7 @@ def test_live_mapping_cache_failure_and_return(page):
 
 def test_missing_data_and_neutral_render(page):
     from playwright.sync_api import expect
-    page.route("**/api/weather", lambda route: route.fulfill(json=weather(("neutral",)*4)))
+    page.route("**/api/weather?map=legacy", lambda route: route.fulfill(json=weather(("neutral",)*4)))
     page.locator("[data-mode]").select_option("live")
     expect(page.locator("[data-status]")).to_contain_text("обновление раз")
     page.clock.run_for(100)
@@ -138,8 +138,8 @@ def test_missing_data_and_neutral_render(page):
     assert all(count > 1000 for count in counts)
     page.screenshot(path=str(ROOT / ".pytest_cache" / "frontend-live.png"), full_page=True)
     page.locator("[data-mode]").select_option("demo")
-    page.unroute("**/api/weather")
-    page.route("**/api/weather", lambda route: route.fulfill(json={"mode": "live", "cities": [{"id":"paris","effect":"unknown","status":"fresh"}]}))
+    page.unroute("**/api/weather?map=legacy")
+    page.route("**/api/weather?map=legacy", lambda route: route.fulfill(json={"mode": "live", "cities": [{"id":"paris","effect":"unknown","status":"fresh"}]}))
     page.locator("[data-mode]").select_option("live")
     expect(page.locator("[data-status]")).to_contain_text("недоступна")
     assert page.locator("canvas").get_attribute("aria-label").count("без эффекта") == 4
@@ -153,7 +153,7 @@ def test_initial_failure_recovery_and_stale(page):
             route.fulfill(status=503, body="Unavailable")
         else:
             route.fulfill(json=weather(("snow", "rain", "neutral", "sun"), "stale"))
-    page.route("**/api/weather", respond)
+    page.route("**/api/weather?map=legacy", respond)
     page.locator("[data-mode]").select_option("live")
     expect(page.locator("[data-status]")).to_contain_text("Не удалось")
     assert page.locator("canvas").get_attribute("aria-label").count("без эффекта") == 4
@@ -168,10 +168,72 @@ def test_file_demo(browser_site):
     browser, _ = browser_site
     page = browser.new_page()
     try:
-        page.goto((ROOT / "frontend" / "index.html").as_uri())
+        page.goto((ROOT / "frontend" / "legacy" / "index.html").as_uri())
         expect(page.locator("[data-status]")).to_contain_text("1 / 3")
         assert page.locator('[value="live"]').evaluate('(option) => option.disabled')
         expect(page.locator("[data-local-hint]")).to_be_visible()
+    finally:
+        page.close()
+
+
+def test_europe_five_stage_cycle_and_transitions(browser_site):
+    from playwright.sync_api import expect
+    browser, url = browser_site
+    page = browser.new_page()
+    requests, errors = [], []
+    page.on("request", lambda request: requests.append(request.url))
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.clock.install()
+        page.goto(url + "/?mode=demo")
+        canvas = page.locator("canvas")
+        catalog = page.evaluate("window.WEATHER_MAP.cities")
+
+        def effects():
+            return dict(item.rsplit(": ", 1) for item in canvas.get_attribute("aria-label").split("; "))
+
+        first = effects()
+        assert all(first[c["name"]] == "снег" for c in catalog if c["latitude"] >= 51)
+        assert all(first[c["name"]] in ("солнце", "пасмурно") for c in catalog if c["latitude"] < 45)
+        page.evaluate("""()=>{
+            window.sawBlend=false;
+            const draw=CanvasRenderingContext2D.prototype.drawImage;
+            CanvasRenderingContext2D.prototype.drawImage=function(...args){
+                if(this.canvas===document.querySelector('canvas')&&this.globalAlpha>0&&this.globalAlpha<1)
+                    window.sawBlend=true;
+                return draw.apply(this,args);
+            };
+        }""")
+        # The automatic timer enters stage two, then cities change gradually.
+        page.clock.run_for(18500)
+        expect(page.locator("[data-status]")).to_contain_text("2 / 5")
+        page.clock.run_for(3000)
+        assert page.evaluate("window.sawBlend")
+        page.locator("[data-pause]").click()
+        page.clock.run_for(50)
+        frozen = canvas.evaluate("c=>c.toDataURL()")
+        frozen_label = effects()
+        page.clock.run_for(2000)
+        assert canvas.evaluate("c=>c.toDataURL()") == frozen
+        assert effects() == frozen_label
+        page.locator("[data-pause]").click()
+        page.clock.run_for(5500)
+        second = effects()
+        assert all((second[c["name"]] == "снег") == (c["latitude"] >= 57) for c in catalog)
+        assert list(second.values()).count("снег") < list(first.values()).count("снег")
+        stages = {}
+        for stage in (3, 4, 5, 1):
+            page.locator("[data-next]").click()
+            expect(page.locator("[data-status]")).to_contain_text(f"{stage} / 5")
+            page.clock.run_for(8500)
+            stages[stage] = effects()
+        assert list(stages[3].values()).count("солнце") > len(catalog) * .6
+        assert "снег" not in stages[3].values()
+        assert list(stages[4].values()).count("солнце") < list(stages[3].values()).count("солнце")
+        assert all((stages[5][c["name"]] == "снег") == (c["latitude"] >= 58) for c in catalog)
+        assert stages[1] == first
+        assert not any("/api/weather" in url for url in requests)
+        assert not errors
     finally:
         page.close()
 
@@ -183,7 +245,7 @@ def test_weather_explanation_panel(page):
         cloud_cover_pct=8, precipitation_mm=0, rain_mm=0, showers_mm=0,
         snowfall_cm=0, precipitation_interval_seconds=900, weather_code=2, is_day=1,
         effect_reason="День, код погоды 2, облачность 8% не выше 60%, осадки отсутствуют.")
-    page.route("**/api/weather", lambda route: route.fulfill(json=data))
+    page.route("**/api/weather?map=legacy", lambda route: route.fulfill(json=data))
     page.locator("[data-mode]").select_option("live")
     expect(page.locator("[data-status]")).to_contain_text("обновление раз")
     panel = page.locator("[data-weather-details]")
@@ -207,7 +269,7 @@ def test_live_intensity_updates_without_effect_change(page):
     data = weather(("neutral","neutral","wind","sun"))
     data["cities"][2]["wind_speed_kmh"] = 18
     data["cities"][3]["cloud_cover_pct"] = 0
-    page.route("**/api/weather", lambda route: route.fulfill(json=data))
+    page.route("**/api/weather?map=legacy", lambda route: route.fulfill(json=data))
     page.locator("[data-mode]").select_option("live")
     expect(page.locator("[data-status]")).to_contain_text("обновление раз")
     page.locator("[data-pause]").click()
@@ -238,7 +300,7 @@ def test_live_intensity_updates_without_effect_change(page):
     assert page.evaluate("visualProbe.clouds")==0
     data["cities"][2]["wind_speed_kmh"]=36
     data["cities"][3]["cloud_cover_pct"]=36
-    with page.expect_response("**/api/weather"):
+    with page.expect_response("**/api/weather?map=legacy"):
         page.clock.fast_forward(600000)
     expect(page.locator("[data-weather-explanations]")).to_contain_text("36 %")
     page.clock.run_for(50)
@@ -247,7 +309,7 @@ def test_live_intensity_updates_without_effect_change(page):
     assert page.evaluate("visualProbe.clouds")==7*3
     data["cities"][2]["wind_speed_kmh"]=200
     data["cities"][3]["cloud_cover_pct"]=60
-    with page.expect_response("**/api/weather"):
+    with page.expect_response("**/api/weather?map=legacy"):
         page.clock.fast_forward(600000)
     expect(page.locator("[data-weather-explanations]")).to_contain_text("60 %")
     page.clock.run_for(50)
@@ -262,7 +324,7 @@ def test_cloudy_grey_letters_and_moving_dark_clouds(page):
     data = weather(("cloudy",)*4)
     for city in data["cities"]:
         city["cloud_cover_pct"]=80
-    page.route("**/api/weather", lambda route: route.fulfill(json=data))
+    page.route("**/api/weather?map=legacy", lambda route: route.fulfill(json=data))
     page.locator("[data-mode]").select_option("live")
     expect(page.locator("canvas")).to_have_attribute("aria-label", "Dublin: пасмурно; Helsinki: пасмурно; Raris: пасмурно; Madrid: пасмурно")
     page.clock.run_for(100)
@@ -287,3 +349,49 @@ def test_cloudy_grey_letters_and_moving_dark_clouds(page):
     paused=page.locator("canvas").evaluate("(c)=>c.toDataURL()")
     page.clock.run_for(500)
     assert paused==page.locator("canvas").evaluate("(c)=>c.toDataURL()")
+
+def test_europe_demo_and_live_versions(browser_site):
+    from playwright.sync_api import expect
+    import json
+    browser,url=browser_site
+    page=browser.new_page(viewport={"width":1700,"height":1100})
+    errors=[]
+    page.on("pageerror",lambda error:errors.append(str(error)))
+    catalog=json.loads((ROOT/"backend/map-layout.json").read_text(encoding="utf-8"))
+    try:
+        page.clock.install()
+        page.goto(url+"/?mode=demo")
+        expect(page.locator("[data-status]")).to_contain_text("1 / 5")
+        canvas=page.locator("canvas")
+        assert canvas.get_attribute("width")=="1600"
+        assert canvas.get_attribute("height")=="900"
+        assert canvas.get_attribute("aria-label").count(":")==175
+        assert canvas.get_attribute("aria-label").count("снег")==page.evaluate("window.WEATHER_MAP.cities.filter(c=>c.latitude>=51).length")
+        page.clock.run_for(2000)
+        page.screenshot(path=str(ROOT/".pytest_cache/europe-demo.png"),full_page=True)
+        page.locator("[data-next]").click()
+        expect(page.locator("[data-status]")).to_contain_text("2 / 5")
+        assert "дождь" in canvas.get_attribute("aria-label")
+        page.route("**/api/weather?map=europe",lambda route:route.fulfill(json={
+            "mode":"live","cities":[dict(id=c["id"],effect=["sun","cloudy","wind","rain","snow"][i%5],
+                status="fresh",data_time="2026-10-18T10:00:00Z",temperature_c=12,
+                wind_speed_kmh=20,cloud_cover_pct=40) for i,c in enumerate(reversed(catalog))]
+        }))
+        page.goto(url+"/?mode=live")
+        expect(page.locator("[data-status]")).to_contain_text("обновление раз")
+        expect(page.locator("[data-mode]")).to_have_value("live")
+        assert page.locator("[data-weather-rows] li").count()==175
+        expected={c["id"]:["солнце","пасмурно","ветер","дождь","снег"][i%5] for i,c in enumerate(reversed(catalog))}
+        label=canvas.get_attribute("aria-label")
+        for city in catalog:
+            assert city["name"]+": "+expected[city["id"]] in label
+        page.clock.run_for(250)
+        page.screenshot(path=str(ROOT/".pytest_cache/europe-live.png"),full_page=True)
+        page.set_viewport_size({"width":600,"height":900})
+        box=canvas.bounding_box()
+        assert box["width"]/box["height"]==pytest.approx(16/9,rel=.002)
+        page.locator("[data-mode]").select_option("demo")
+        assert canvas.get_attribute("aria-label").count("снег")==page.evaluate("window.WEATHER_MAP.cities.filter(c=>c.latitude>=51).length")
+        assert not errors
+    finally:
+        page.close()

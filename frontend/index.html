@@ -1,14 +1,15 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Четыре города — погода</title><link rel="stylesheet" href="style.css"></head><body><div id="weather-map">
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Европа — погода в городах</title><link rel="stylesheet" href="style.css"></head><body><div id="weather-map"><nav class="version-links"><a href="/?mode=demo">Демо: цикл погоды</a><a href="/?mode=live">Актуальная погода</a><a href="/legacy/">Прежние четыре города</a></nav>
 
-<canvas width="1100" height="578" role="img" aria-label="Dublin, Helsinki, Raris и Madrid: дождь деформирует буквы, снег накапливается, ветер гнёт буквы, солнце подсвечивает их изнутри."></canvas>
+<canvas width="1600" height="900" role="img" aria-label="Погодная карта городов Европы 16:9"></canvas>
 <div class="weather-track"><div class="weather-progress"></div></div>
-<div class="weather-toolbar"><label>Режим: <select data-mode><option value="demo">Демо</option><option value="live">Реальная погода</option></select></label><button class="btn" type="button" data-pause>Пауза</button><button class="btn" type="button" data-next>Следующая сцена</button><span data-status aria-live="polite">Сцена 1 / 3 · 12 секунд</span></div>
+<div class="weather-toolbar"><label>Режим: <select data-mode><option value="demo">Демо: цикл погоды</option><option value="live">Реальная погода</option></select></label><button class="btn" type="button" data-pause>Пауза</button><button class="btn" type="button" data-next>Следующая сцена</button><span data-status aria-live="polite">Сцена 1 / 5 · 18 секунд</span></div>
 <p data-local-hint hidden>Реальная погода доступна при запуске через сервер: http://127.0.0.1:8000/.</p>
 <section data-weather-info hidden aria-label="Погода в городах">
  <p>Данные погодных моделей <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>. Время указано в часовом поясе браузера.</p>
- <ul data-weather-rows></ul>
+ <details><summary>Погода во всех городах</summary><ul data-weather-rows></ul></details>
  <details data-weather-details><summary>Почему выбран этот эффект?</summary><div data-weather-explanations></div></details>
 </section>
 </div>
+<script src="map-cities.js"></script>
 <script src="app.js"></script>
 </body></html>

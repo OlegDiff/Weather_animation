@@ -1,5 +1,6 @@
 """HTTP client and per-city in-memory cache (one backend process)."""
 from copy import deepcopy
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 import json
 import logging
@@ -34,9 +35,53 @@ def fetch_current(city):
         return json.load(response)
 
 
+
+def fetch_many(cities):
+    """Fetch small batches concurrently; failures remain local to a batch."""
+    if not cities:
+        return {}
+    chunks = [cities[i:i+40] for i in range(0, len(cities), 40)]
+    def fetch_chunk(chunk):
+        params = {
+            "latitude": ",".join(str(c["latitude"]) for c in chunk),
+            "longitude": ",".join(str(c["longitude"]) for c in chunk),
+            "current": ",".join(field[0] for field in FIELDS.values()),
+            "timezone": "GMT", "temperature_unit": "celsius",
+            "wind_speed_unit": "kmh", "precipitation_unit": "mm",
+        }
+        with urlopen("https://api.open-meteo.com/v1/forecast?" + urlencode(params),
+                     timeout=REQUEST_TIMEOUT_SECONDS) as response:
+            values = json.load(response)
+        if len(chunk) == 1 and isinstance(values, dict):
+            values = [values]
+        if not isinstance(values, list) or len(values) != len(chunk):
+            raise ValueError("Unexpected batch response length")
+        result = {}
+        for city, value in zip(chunk, values):
+            if not isinstance(value, dict):
+                result[city["id"]] = ValueError("Invalid city response")
+                continue
+            # Provider grid coordinates may differ slightly from city coordinates.
+            if abs(value.get("latitude", 999) - city["latitude"]) > 1 or abs(value.get("longitude", 999) - city["longitude"]) > 1:
+                result[city["id"]] = ValueError("Mismatched location")
+            else:
+                result[city["id"]] = value
+        return result
+    result = {}
+    with ThreadPoolExecutor(max_workers=5) as pool:
+        futures = {pool.submit(fetch_chunk, chunk): chunk for chunk in chunks}
+        for future in as_completed(futures):
+            chunk = futures[future]
+            try:
+                result.update(future.result())
+            except (URLError, OSError, ValueError, TypeError) as error:
+                result.update({c["id"]: error for c in chunk})
+    return result
+
 class WeatherService:
-    def __init__(self, fetcher=fetch_current, clock=monotonic, now=utcnow):
+    def __init__(self, fetcher=fetch_current, clock=monotonic, now=utcnow, cities=CITIES, batch_fetcher=None):
         self.fetcher, self.clock, self.now = fetcher, clock, now
+        self.cities, self.batch_fetcher = cities, batch_fetcher
         self.cache = {}
         self.next_attempt = {}
         self.errors = {}
@@ -45,12 +90,17 @@ class WeatherService:
     def get_weather(self):
         # Serializes refreshes so simultaneous browsers cannot multiply requests.
         with self.lock:
-            for city in CITIES:
+            due = [c for c in self.cities if self.clock() >= self.next_attempt.get(c['id'], 0)]
+            batch = self.batch_fetcher(due) if self.batch_fetcher and due else {}
+            for city in self.cities:
                 key = city["id"]
                 if self.clock() < self.next_attempt.get(key, 0):
                     continue
                 try:
-                    data = normalize(self.fetcher(city))
+                    raw = batch.get(key, ValueError('Missing batch result')) if self.batch_fetcher else self.fetcher(city)
+                    if isinstance(raw, Exception):
+                        raise raw
+                    data = normalize(raw)
                     timestamp = datetime.fromisoformat(data["data_time"].replace("Z", "+00:00"))
                     if (timestamp - self.now()).total_seconds() > 300:
                         raise ValueError("Future data timestamp")
@@ -63,7 +113,7 @@ class WeatherService:
                     self.next_attempt[key] = self.clock() + RETRY_SECONDS
 
             cities = []
-            for city in CITIES:
+            for city in self.cities:
                 key = city["id"]
                 data = deepcopy(self.cache.get(key))
                 if data is None:

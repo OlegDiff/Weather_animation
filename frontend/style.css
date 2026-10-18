@@ -13,3 +13,8 @@ body{margin:0;padding:20px;font:14px system-ui;background:#fff;color:#333}#weath
 #weather-map [data-weather-explanations]{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px 24px}
 #weather-map [data-weather-explanations] h3{font-size:14px;margin:12px 0 6px}
 #weather-map [data-weather-explanations] p{margin:4px 0;overflow-wrap:anywhere}
+
+#weather-map{max-width:1600px}
+#weather-map canvas{aspect-ratio:16/9}
+.version-links{display:flex;gap:24px;flex-wrap:wrap;padding:0 0 12px;font-size:13px}
+.version-links a{color:#555}

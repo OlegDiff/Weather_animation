@@ -2,6 +2,10 @@
 
 Instructions for AI coding agents working in this repository. Read `README.md` and inspect the existing files before proposing or making changes. If the README describes a planned file that does not yet exist, do not assume it is implemented.
 
+## Current scope (user-approved, 2026-10-18)
+
+The main map follows Europe Typographic City Map.png: 175 readable cities, 1600x900 (16:9), demo with snow and live weather. Preserve the four-city implementation at frontend/legacy/. See docs/europe-map.md for catalogue provenance and unresolved labels. The legacy preservation rules below apply to that snapshot; the main map uses the approved expanded layout and scaled effects.
+
 ## Project goal
 
 Weather_animation is a learning project: animate the **letters of city names** according to weather conditions in Dublin, Helsinki, Paris, and Madrid. A working prototype with four effects (`rain`, `snow`, `wind`, `sun`) and a looping synthetic weather scenario already exists outside or inside the repository. **Preserving that prototype is the top priority** during migration and integration.

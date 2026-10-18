@@ -1,0 +1,1402 @@
+{
+  "inverness-gb": {
+    "id": 2646088,
+    "name": "Inverness",
+    "latitude": 57.47908,
+    "longitude": -4.22398,
+    "country_code": "GB",
+    "population": 47790
+  },
+  "aberdeen-gb": {
+    "id": 2657832,
+    "name": "Aberdeen",
+    "latitude": 57.14369,
+    "longitude": -2.09814,
+    "country_code": "GB",
+    "population": 198590
+  },
+  "glasgow-gb": {
+    "id": 2648579,
+    "name": "Glasgow",
+    "latitude": 55.86515,
+    "longitude": -4.25763,
+    "country_code": "GB",
+    "population": 626410
+  },
+  "edinburgh-gb": {
+    "id": 2650225,
+    "name": "Edinburgh",
+    "latitude": 55.95206,
+    "longitude": -3.19648,
+    "country_code": "GB",
+    "population": 514990
+  },
+  "derry-gb": {
+    "id": 2643736,
+    "name": "Londonderry",
+    "latitude": 54.9981,
+    "longitude": -7.30934,
+    "country_code": "GB",
+    "population": 83652
+  },
+  "belfast-gb": {
+    "id": 2655984,
+    "name": "Belfast",
+    "latitude": 54.59682,
+    "longitude": -5.92541,
+    "country_code": "GB",
+    "population": 348005
+  },
+  "dublin-ie": {
+    "id": 2964574,
+    "name": "Dublin",
+    "latitude": 53.33306,
+    "longitude": -6.24889,
+    "country_code": "IE",
+    "population": 1024027
+  },
+  "galway-ie": {
+    "id": 2964180,
+    "name": "Galway",
+    "latitude": 53.27245,
+    "longitude": -9.05095,
+    "country_code": "IE",
+    "population": 85910
+  },
+  "limerick-ie": {
+    "id": 2962943,
+    "name": "Limerick",
+    "latitude": 52.66472,
+    "longitude": -8.62306,
+    "country_code": "IE",
+    "population": 102287
+  },
+  "cork-ie": {
+    "id": 2965140,
+    "name": "Cork",
+    "latitude": 51.89797,
+    "longitude": -8.47061,
+    "country_code": "IE",
+    "population": 224004
+  },
+  "newcastle-upon-tyne-gb": {
+    "id": 2641673,
+    "name": "Newcastle upon Tyne",
+    "latitude": 54.97328,
+    "longitude": -1.61396,
+    "country_code": "GB",
+    "population": 300125
+  },
+  "leeds-gb": {
+    "id": 2644688,
+    "name": "Leeds",
+    "latitude": 53.79648,
+    "longitude": -1.54785,
+    "country_code": "GB",
+    "population": 536280
+  },
+  "manchester-gb": {
+    "id": 2643123,
+    "name": "Manchester",
+    "latitude": 53.48095,
+    "longitude": -2.23743,
+    "country_code": "GB",
+    "population": 568996
+  },
+  "liverpool-gb": {
+    "id": 2644210,
+    "name": "Liverpool",
+    "latitude": 53.41058,
+    "longitude": -2.97794,
+    "country_code": "GB",
+    "population": 496770
+  },
+  "nottingham-gb": {
+    "id": 2641170,
+    "name": "Nottingham",
+    "latitude": 52.9536,
+    "longitude": -1.15047,
+    "country_code": "GB",
+    "population": 323632
+  },
+  "london-gb": {
+    "id": 2643743,
+    "name": "London",
+    "latitude": 51.50853,
+    "longitude": -0.12574,
+    "country_code": "GB",
+    "population": 8961989
+  },
+  "cardiff-gb": {
+    "id": 2653822,
+    "name": "Cardiff",
+    "latitude": 51.48,
+    "longitude": -3.18,
+    "country_code": "GB",
+    "population": 372089
+  },
+  "bristol-gb": {
+    "id": 2654675,
+    "name": "Bristol",
+    "latitude": 51.45523,
+    "longitude": -2.59665,
+    "country_code": "GB",
+    "population": 479024
+  },
+  "brighton-gb": {
+    "id": 2654710,
+    "name": "Brighton",
+    "latitude": 50.82838,
+    "longitude": -0.13947,
+    "country_code": "GB",
+    "population": 283870
+  },
+  "southampton-gb": {
+    "id": 2637487,
+    "name": "Southampton",
+    "latitude": 50.90395,
+    "longitude": -1.40428,
+    "country_code": "GB",
+    "population": 269781
+  },
+  "groningen-nl": {
+    "id": 2755251,
+    "name": "Groningen",
+    "latitude": 53.21917,
+    "longitude": 6.56667,
+    "country_code": "NL",
+    "population": 244807
+  },
+  "amsterdam-nl": {
+    "id": 2759794,
+    "name": "Amsterdam",
+    "latitude": 52.37403,
+    "longitude": 4.88969,
+    "country_code": "NL",
+    "population": 741636
+  },
+  "the-hague-nl": {
+    "id": 2747373,
+    "name": "The Hague",
+    "latitude": 52.07667,
+    "longitude": 4.29861,
+    "country_code": "NL",
+    "population": 474292
+  },
+  "rotterdam-nl": {
+    "id": 2747891,
+    "name": "Rotterdam",
+    "latitude": 51.9225,
+    "longitude": 4.47917,
+    "country_code": "NL",
+    "population": 868135
+  },
+  "antwerp-be": {
+    "id": 2803138,
+    "name": "Antwerp",
+    "latitude": 51.22047,
+    "longitude": 4.40026,
+    "country_code": "BE",
+    "population": 529247
+  },
+  "brussels-be": {
+    "id": 2800866,
+    "name": "Brussels",
+    "latitude": 50.85045,
+    "longitude": 4.34878,
+    "country_code": "BE",
+    "population": 1019022
+  },
+  "liege-be": {
+    "id": 2792413,
+    "name": "Liège",
+    "latitude": 50.63373,
+    "longitude": 5.56749,
+    "country_code": "BE",
+    "population": 195278
+  },
+  "luxembourg-lu": {
+    "id": 2960316,
+    "name": "Luxembourg",
+    "latitude": 49.60982,
+    "longitude": 6.13268,
+    "country_code": "LU",
+    "population": 76684
+  },
+  "kiel-de": {
+    "id": 2891122,
+    "name": "Kiel",
+    "latitude": 54.32133,
+    "longitude": 10.13489,
+    "country_code": "DE",
+    "population": 252668
+  },
+  "rostock-de": {
+    "id": 2844588,
+    "name": "Rostock",
+    "latitude": 54.0887,
+    "longitude": 12.14049,
+    "country_code": "DE",
+    "population": 198293
+  },
+  "hamburg-de": {
+    "id": 2911298,
+    "name": "Hamburg",
+    "latitude": 53.55073,
+    "longitude": 9.99302,
+    "country_code": "DE",
+    "population": 1973896
+  },
+  "bremen-de": {
+    "id": 2944388,
+    "name": "Bremen",
+    "latitude": 53.07582,
+    "longitude": 8.80717,
+    "country_code": "DE",
+    "population": 546501
+  },
+  "hannover-de": {
+    "id": 2910831,
+    "name": "Hanover",
+    "latitude": 52.37052,
+    "longitude": 9.73322,
+    "country_code": "DE",
+    "population": 515140
+  },
+  "dortmund-de": {
+    "id": 2935517,
+    "name": "Dortmund",
+    "latitude": 51.51494,
+    "longitude": 7.466,
+    "country_code": "DE",
+    "population": 588462
+  },
+  "dusseldorf-de": {
+    "id": 2934246,
+    "name": "Düsseldorf",
+    "latitude": 51.22319,
+    "longitude": 6.77927,
+    "country_code": "DE",
+    "population": 618685
+  },
+  "cologne-de": {
+    "id": 2886242,
+    "name": "Cologne",
+    "latitude": 50.93333,
+    "longitude": 6.95,
+    "country_code": "DE",
+    "population": 1024621
+  },
+  "essen-de": {
+    "id": 2928810,
+    "name": "Essen",
+    "latitude": 51.45657,
+    "longitude": 7.01228,
+    "country_code": "DE",
+    "population": 593085
+  },
+  "frankfurt-am-main-de": {
+    "id": 2925533,
+    "name": "Frankfurt am Main",
+    "latitude": 50.11552,
+    "longitude": 8.68417,
+    "country_code": "DE",
+    "population": 650000
+  },
+  "mannheim-de": {
+    "id": 2873891,
+    "name": "Mannheim",
+    "latitude": 49.4891,
+    "longitude": 8.46694,
+    "country_code": "DE",
+    "population": 307960
+  },
+  "nuremberg-de": {
+    "id": 2861650,
+    "name": "Nuremberg",
+    "latitude": 49.45421,
+    "longitude": 11.07752,
+    "country_code": "DE",
+    "population": 515543
+  },
+  "gdansk-pl": {
+    "id": 3099434,
+    "name": "Gdansk",
+    "latitude": 54.35227,
+    "longitude": 18.64912,
+    "country_code": "PL",
+    "population": 487371
+  },
+  "warsaw-pl": {
+    "id": 756135,
+    "name": "Warsaw",
+    "latitude": 52.22977,
+    "longitude": 21.01178,
+    "country_code": "PL",
+    "population": 1702139
+  },
+  "odz-pl": {
+    "id": 3093133,
+    "name": "Lodz",
+    "latitude": 51.77058,
+    "longitude": 19.47395,
+    "country_code": "PL",
+    "population": 639890
+  },
+  "katowice-pl": {
+    "id": 3096472,
+    "name": "Katowice",
+    "latitude": 50.2597,
+    "longitude": 19.02173,
+    "country_code": "PL",
+    "population": 286960
+  },
+  "lublin-pl": {
+    "id": 765876,
+    "name": "Lublin",
+    "latitude": 51.25058,
+    "longitude": 22.57009,
+    "country_code": "PL",
+    "population": 336339
+  },
+  "krakow-pl": {
+    "id": 3094802,
+    "name": "Krakow",
+    "latitude": 50.06143,
+    "longitude": 19.93658,
+    "country_code": "PL",
+    "population": 816614
+  },
+  "tallinn-ee": {
+    "id": 588409,
+    "name": "Tallinn",
+    "latitude": 59.43696,
+    "longitude": 24.75353,
+    "country_code": "EE",
+    "population": 394024
+  },
+  "tartu-ee": {
+    "id": 588335,
+    "name": "Tartu",
+    "latitude": 58.38062,
+    "longitude": 26.72509,
+    "country_code": "EE",
+    "population": 91407
+  },
+  "riga-lv": {
+    "id": 456172,
+    "name": "Riga",
+    "latitude": 56.946,
+    "longitude": 24.10589,
+    "country_code": "LV",
+    "population": 742572
+  },
+  "daugavpils-lv": {
+    "id": 460413,
+    "name": "Daugavpils",
+    "latitude": 55.88333,
+    "longitude": 26.53333,
+    "country_code": "LV",
+    "population": 78126
+  },
+  "klaipeda-lt": {
+    "id": 598098,
+    "name": "Klaipėda",
+    "latitude": 55.7068,
+    "longitude": 21.13912,
+    "country_code": "LT",
+    "population": 172292
+  },
+  "kaunas-lt": {
+    "id": 598316,
+    "name": "Kaunas",
+    "latitude": 54.90156,
+    "longitude": 23.90909,
+    "country_code": "LT",
+    "population": 289380
+  },
+  "vilnius-lt": {
+    "id": 593116,
+    "name": "Vilnius",
+    "latitude": 54.68916,
+    "longitude": 25.2798,
+    "country_code": "LT",
+    "population": 542366
+  },
+  "grodno-by": {
+    "id": 628096,
+    "name": "Grodno",
+    "latitude": 53.62865,
+    "longitude": 23.8942,
+    "country_code": "BY",
+    "population": null
+  },
+  "minsk-by": {
+    "id": 625144,
+    "name": "Minsk",
+    "latitude": 53.90019,
+    "longitude": 27.56653,
+    "country_code": "BY",
+    "population": 1742124
+  },
+  "vitebsk-by": {
+    "id": 620127,
+    "name": "Vitebsk",
+    "latitude": 55.1904,
+    "longitude": 30.2049,
+    "country_code": "BY",
+    "population": 358927
+  },
+  "mogilev-by": {
+    "id": 625665,
+    "name": "Mogilev",
+    "latitude": 53.90876,
+    "longitude": 30.34044,
+    "country_code": "BY",
+    "population": 352896
+  },
+  "brest-by": {
+    "id": 629634,
+    "name": "Brest",
+    "latitude": 52.10894,
+    "longitude": 23.71749,
+    "country_code": "BY",
+    "population": 347138
+  },
+  "gomel-by": {
+    "id": 627907,
+    "name": "Homyel",
+    "latitude": 52.4345,
+    "longitude": 30.9754,
+    "country_code": "BY",
+    "population": 501193
+  },
+  "kyiv-ua": {
+    "id": 703448,
+    "name": "Kyiv",
+    "latitude": 50.45466,
+    "longitude": 30.5238,
+    "country_code": "UA",
+    "population": 2952301
+  },
+  "kharkiv-ua": {
+    "id": 706483,
+    "name": "Kharkiv",
+    "latitude": 49.98177,
+    "longitude": 36.25475,
+    "country_code": "UA",
+    "population": 1421125
+  },
+  "lviv-ua": {
+    "id": 702550,
+    "name": "Lviv",
+    "latitude": 49.83826,
+    "longitude": 24.02324,
+    "country_code": "UA",
+    "population": 717273
+  },
+  "dnipro-ua": {
+    "id": 709930,
+    "name": "Dnipro",
+    "latitude": 48.46664,
+    "longitude": 35.04066,
+    "country_code": "UA",
+    "population": 968502
+  },
+  "odesa-ua": {
+    "id": 698740,
+    "name": "Odesa",
+    "latitude": 46.48572,
+    "longitude": 30.74383,
+    "country_code": "UA",
+    "population": 1010537
+  },
+  "lille-fr": {
+    "id": 2998324,
+    "name": "Lille",
+    "latitude": 50.63391,
+    "longitude": 3.05512,
+    "country_code": "FR",
+    "population": 238695
+  },
+  "le-havre-fr": {
+    "id": 3003796,
+    "name": "Le Havre",
+    "latitude": 49.49346,
+    "longitude": 0.10785,
+    "country_code": "FR",
+    "population": 185972
+  },
+  "reims-fr": {
+    "id": 2984114,
+    "name": "Reims",
+    "latitude": 49.26526,
+    "longitude": 4.02853,
+    "country_code": "FR",
+    "population": 196565
+  },
+  "brest-fr": {
+    "id": 3030300,
+    "name": "Brest",
+    "latitude": 48.39029,
+    "longitude": -4.48628,
+    "country_code": "FR",
+    "population": 144899
+  },
+  "rennes-fr": {
+    "id": 2983990,
+    "name": "Rennes",
+    "latitude": 48.11109,
+    "longitude": -1.67431,
+    "country_code": "FR",
+    "population": 227830
+  },
+  "nantes-fr": {
+    "id": 2990969,
+    "name": "Nantes",
+    "latitude": 47.21725,
+    "longitude": -1.55336,
+    "country_code": "FR",
+    "population": 325070
+  },
+  "paris-fr": {
+    "id": 2988507,
+    "name": "Paris",
+    "latitude": 48.85341,
+    "longitude": 2.3488,
+    "country_code": "FR",
+    "population": 2138551
+  },
+  "angers-fr": {
+    "id": 3037656,
+    "name": "Angers",
+    "latitude": 47.47156,
+    "longitude": -0.55202,
+    "country_code": "FR",
+    "population": 168279
+  },
+  "tours-fr": {
+    "id": 2972191,
+    "name": "Tours",
+    "latitude": 47.39484,
+    "longitude": 0.70398,
+    "country_code": "FR",
+    "population": 141621
+  },
+  "strasbourg-fr": {
+    "id": 2973783,
+    "name": "Strasbourg",
+    "latitude": 48.58392,
+    "longitude": 7.74553,
+    "country_code": "FR",
+    "population": 274845
+  },
+  "dijon-fr": {
+    "id": 3021372,
+    "name": "Dijon",
+    "latitude": 47.31344,
+    "longitude": 5.01391,
+    "country_code": "FR",
+    "population": 159941
+  },
+  "clermont-ferrand-fr": {
+    "id": 3024635,
+    "name": "Clermont-Ferrand",
+    "latitude": 45.77969,
+    "longitude": 3.08682,
+    "country_code": "FR",
+    "population": 147865
+  },
+  "lyon-fr": {
+    "id": 2996944,
+    "name": "Lyon",
+    "latitude": 45.74906,
+    "longitude": 4.84789,
+    "country_code": "FR",
+    "population": 520774
+  },
+  "bordeaux-fr": {
+    "id": 3031582,
+    "name": "Bordeaux",
+    "latitude": 44.84124,
+    "longitude": -0.58046,
+    "country_code": "FR",
+    "population": 265328
+  },
+  "toulouse-fr": {
+    "id": 2972315,
+    "name": "Toulouse",
+    "latitude": 43.60426,
+    "longitude": 1.44367,
+    "country_code": "FR",
+    "population": 511684
+  },
+  "montpellier-fr": {
+    "id": 2992166,
+    "name": "Montpellier",
+    "latitude": 43.61093,
+    "longitude": 3.87635,
+    "country_code": "FR",
+    "population": 248252
+  },
+  "marseille-fr": {
+    "id": 2995469,
+    "name": "Marseille",
+    "latitude": 43.29695,
+    "longitude": 5.38107,
+    "country_code": "FR",
+    "population": 877215
+  },
+  "nice-fr": {
+    "id": 2990440,
+    "name": "Nice",
+    "latitude": 43.70313,
+    "longitude": 7.26608,
+    "country_code": "FR",
+    "population": 342669
+  },
+  "basel-ch": {
+    "id": 2661604,
+    "name": "Basel",
+    "latitude": 47.55839,
+    "longitude": 7.57327,
+    "country_code": "CH",
+    "population": 177595
+  },
+  "bern-ch": {
+    "id": 2661552,
+    "name": "Bern",
+    "latitude": 46.94809,
+    "longitude": 7.44744,
+    "country_code": "CH",
+    "population": 121631
+  },
+  "lausanne-ch": {
+    "id": 2659994,
+    "name": "Lausanne",
+    "latitude": 46.516,
+    "longitude": 6.63282,
+    "country_code": "CH",
+    "population": 139111
+  },
+  "geneva-ch": {
+    "id": 2660646,
+    "name": "Geneva",
+    "latitude": 46.20222,
+    "longitude": 6.14569,
+    "country_code": "CH",
+    "population": 201741
+  },
+  "innsbruck-at": {
+    "id": 2775220,
+    "name": "Innsbruck",
+    "latitude": 47.26266,
+    "longitude": 11.39454,
+    "country_code": "AT",
+    "population": 132493
+  },
+  "vienna-at": {
+    "id": 2761369,
+    "name": "Vienna",
+    "latitude": 48.20849,
+    "longitude": 16.37208,
+    "country_code": "AT",
+    "population": 1691468
+  },
+  "graz-at": {
+    "id": 2778067,
+    "name": "Graz",
+    "latitude": 47.06733,
+    "longitude": 15.44197,
+    "country_code": "AT",
+    "population": 303270
+  },
+  "prague-cz": {
+    "id": 3067696,
+    "name": "Prague",
+    "latitude": 50.08804,
+    "longitude": 14.42076,
+    "country_code": "CZ",
+    "population": 1165581
+  },
+  "pilsen-cz": {
+    "id": 3068160,
+    "name": "Pilsen",
+    "latitude": 49.74747,
+    "longitude": 13.37759,
+    "country_code": "CZ",
+    "population": 187863
+  },
+  "brno-cz": {
+    "id": 3078610,
+    "name": "Brno",
+    "latitude": 49.19522,
+    "longitude": 16.60796,
+    "country_code": "CZ",
+    "population": 404296
+  },
+  "ostrava-cz": {
+    "id": 3068799,
+    "name": "Ostrava",
+    "latitude": 49.83465,
+    "longitude": 18.28204,
+    "country_code": "CZ",
+    "population": 280853
+  },
+  "zilina-sk": {
+    "id": 3056508,
+    "name": "Žilina",
+    "latitude": 49.22315,
+    "longitude": 18.73941,
+    "country_code": "SK",
+    "population": 81219
+  },
+  "kosice-sk": {
+    "id": 724443,
+    "name": "Košice",
+    "latitude": 48.71441,
+    "longitude": 21.25802,
+    "country_code": "SK",
+    "population": 225044
+  },
+  "bratislava-sk": {
+    "id": 3060972,
+    "name": "Bratislava",
+    "latitude": 48.14816,
+    "longitude": 17.10674,
+    "country_code": "SK",
+    "population": 423737
+  },
+  "budapest-hu": {
+    "id": 3054643,
+    "name": "Budapest",
+    "latitude": 47.49835,
+    "longitude": 19.04045,
+    "country_code": "HU",
+    "population": 1741041
+  },
+  "miskolc-hu": {
+    "id": 717582,
+    "name": "Miskolc",
+    "latitude": 48.10327,
+    "longitude": 20.77806,
+    "country_code": "HU",
+    "population": 154521
+  },
+  "debrecen-hu": {
+    "id": 721472,
+    "name": "Debrecen",
+    "latitude": 47.53167,
+    "longitude": 21.62444,
+    "country_code": "HU",
+    "population": 202402
+  },
+  "pecs-hu": {
+    "id": 3046526,
+    "name": "Pécs",
+    "latitude": 46.07617,
+    "longitude": 18.22814,
+    "country_code": "HU",
+    "population": 145347
+  },
+  "szeged-hu": {
+    "id": 715429,
+    "name": "Szeged",
+    "latitude": 46.253,
+    "longitude": 20.14824,
+    "country_code": "HU",
+    "population": 160766
+  },
+  "ljubljana-si": {
+    "id": 3196359,
+    "name": "Ljubljana",
+    "latitude": 46.05108,
+    "longitude": 14.50513,
+    "country_code": "SI",
+    "population": 272220
+  },
+  "maribor-si": {
+    "id": 3195506,
+    "name": "Maribor",
+    "latitude": 46.55583,
+    "longitude": 15.64593,
+    "country_code": "SI",
+    "population": 96209
+  },
+  "zagreb-hr": {
+    "id": 3186886,
+    "name": "Zagreb",
+    "latitude": 45.81444,
+    "longitude": 15.97798,
+    "country_code": "HR",
+    "population": 663592
+  },
+  "split-hr": {
+    "id": 3190261,
+    "name": "Split",
+    "latitude": 43.50891,
+    "longitude": 16.43915,
+    "country_code": "HR",
+    "population": 149830
+  },
+  "rijeka-hr": {
+    "id": 3191648,
+    "name": "Rijeka",
+    "latitude": 45.32673,
+    "longitude": 14.44241,
+    "country_code": "HR",
+    "population": 107964
+  },
+  "osijek-hr": {
+    "id": 3193935,
+    "name": "Osijek",
+    "latitude": 45.55066,
+    "longitude": 18.6942,
+    "country_code": "HR",
+    "population": 75535
+  },
+  "sarajevo-ba": {
+    "id": 3191281,
+    "name": "Sarajevo",
+    "latitude": 43.84864,
+    "longitude": 18.35644,
+    "country_code": "BA",
+    "population": 696731
+  },
+  "novi-sad-rs": {
+    "id": 3194360,
+    "name": "Novi Sad",
+    "latitude": 45.25167,
+    "longitude": 19.83694,
+    "country_code": "RS",
+    "population": 215400
+  },
+  "belgrade-rs": {
+    "id": 792680,
+    "name": "Belgrade",
+    "latitude": 44.80401,
+    "longitude": 20.46513,
+    "country_code": "RS",
+    "population": 1273651
+  },
+  "nis-rs": {
+    "id": 787657,
+    "name": "Niš",
+    "latitude": 43.32472,
+    "longitude": 21.90333,
+    "country_code": "RS",
+    "population": 250000
+  },
+  "kragujevac-rs": {
+    "id": 789128,
+    "name": "Kragujevac",
+    "latitude": 44.01667,
+    "longitude": 20.91667,
+    "country_code": "RS",
+    "population": 147473
+  },
+  "podgorica-me": {
+    "id": 3193044,
+    "name": "Podgorica",
+    "latitude": 42.44124,
+    "longitude": 19.26309,
+    "country_code": "ME",
+    "population": 236852
+  },
+  "tirana-al": {
+    "id": 3183875,
+    "name": "Tirana",
+    "latitude": 41.32744,
+    "longitude": 19.81866,
+    "country_code": "AL",
+    "population": 418495
+  },
+  "durres-al": {
+    "id": 3185728,
+    "name": "Durrës",
+    "latitude": 41.32355,
+    "longitude": 19.45469,
+    "country_code": "AL",
+    "population": 195920
+  },
+  "skopje-mk": {
+    "id": 785842,
+    "name": "Skopje",
+    "latitude": 41.99646,
+    "longitude": 21.43141,
+    "country_code": "MK",
+    "population": 474889
+  },
+  "bitola-mk": {
+    "id": 792578,
+    "name": "Bitola",
+    "latitude": 41.03226,
+    "longitude": 21.33553,
+    "country_code": "MK",
+    "population": 69287
+  },
+  "cluj-napoca-ro": {
+    "id": 681290,
+    "name": "Cluj-Napoca",
+    "latitude": 46.76667,
+    "longitude": 23.6,
+    "country_code": "RO",
+    "population": 286598
+  },
+  "iasi-ro": {
+    "id": 675810,
+    "name": "Iași",
+    "latitude": 47.16667,
+    "longitude": 27.6,
+    "country_code": "RO",
+    "population": 378954
+  },
+  "timisoara-ro": {
+    "id": 665087,
+    "name": "Timișoara",
+    "latitude": 45.75372,
+    "longitude": 21.22571,
+    "country_code": "RO",
+    "population": 250849
+  },
+  "brasov-ro": {
+    "id": 683844,
+    "name": "Brasov",
+    "latitude": 45.64861,
+    "longitude": 25.60613,
+    "country_code": "RO",
+    "population": 253200
+  },
+  "bucharest-ro": {
+    "id": 683506,
+    "name": "Bucharest",
+    "latitude": 44.43225,
+    "longitude": 26.10626,
+    "country_code": "RO",
+    "population": 1877155
+  },
+  "craiova-ro": {
+    "id": 680332,
+    "name": "Craiova",
+    "latitude": 44.31667,
+    "longitude": 23.8,
+    "country_code": "RO",
+    "population": 234140
+  },
+  "constanta-ro": {
+    "id": 680963,
+    "name": "Constanța",
+    "latitude": 44.18073,
+    "longitude": 28.63432,
+    "country_code": "RO",
+    "population": 317832
+  },
+  "sofia-bg": {
+    "id": 727011,
+    "name": "Sofia",
+    "latitude": 42.69751,
+    "longitude": 23.32415,
+    "country_code": "BG",
+    "population": 1152556
+  },
+  "ruse-bg": {
+    "id": 727523,
+    "name": "Rousse",
+    "latitude": 43.84872,
+    "longitude": 25.9534,
+    "country_code": "BG",
+    "population": 121168
+  },
+  "varna-bg": {
+    "id": 726050,
+    "name": "Varna",
+    "latitude": 43.21912,
+    "longitude": 27.91024,
+    "country_code": "BG",
+    "population": 318737
+  },
+  "burgas-bg": {
+    "id": 732770,
+    "name": "Burgas",
+    "latitude": 42.50651,
+    "longitude": 27.46886,
+    "country_code": "BG",
+    "population": 210646
+  },
+  "plovdiv-bg": {
+    "id": 728193,
+    "name": "Plovdiv",
+    "latitude": 42.15387,
+    "longitude": 24.75001,
+    "country_code": "BG",
+    "population": 329489
+  },
+  "thessaloniki-gr": {
+    "id": 734077,
+    "name": "Thessaloniki",
+    "latitude": 40.64072,
+    "longitude": 22.93493,
+    "country_code": "GR",
+    "population": 317778
+  },
+  "athens-gr": {
+    "id": 264371,
+    "name": "Athens",
+    "latitude": 37.98376,
+    "longitude": 23.72784,
+    "country_code": "GR",
+    "population": 664046
+  },
+  "heraklion-gr": {
+    "id": 261745,
+    "name": "Heraklion",
+    "latitude": 35.32787,
+    "longitude": 25.14341,
+    "country_code": "GR",
+    "population": 137154
+  },
+  "nicosia-cy": {
+    "id": 146268,
+    "name": "Nicosia",
+    "latitude": 35.17284,
+    "longitude": 33.35397,
+    "country_code": "CY",
+    "population": 200452
+  },
+  "istanbul-tr": {
+    "id": 745044,
+    "name": "Istanbul",
+    "latitude": 41.01384,
+    "longitude": 28.94966,
+    "country_code": "TR",
+    "population": 15701602
+  },
+  "bursa-tr": {
+    "id": 750269,
+    "name": "Bursa",
+    "latitude": 40.19559,
+    "longitude": 29.06013,
+    "country_code": "TR",
+    "population": 3101833
+  },
+  "ankara-tr": {
+    "id": 323786,
+    "name": "Ankara",
+    "latitude": 39.91987,
+    "longitude": 32.85427,
+    "country_code": "TR",
+    "population": 3517182
+  },
+  "izmir-tr": {
+    "id": 311046,
+    "name": "Izmir",
+    "latitude": 38.41273,
+    "longitude": 27.13838,
+    "country_code": "TR",
+    "population": 2938292
+  },
+  "antalya-tr": {
+    "id": 323777,
+    "name": "Antalya",
+    "latitude": 36.90812,
+    "longitude": 30.69556,
+    "country_code": "TR",
+    "population": 1335002
+  },
+  "adana-tr": {
+    "id": 325363,
+    "name": "Adana",
+    "latitude": 36.98615,
+    "longitude": 35.32531,
+    "country_code": "TR",
+    "population": 1816750
+  },
+  "rome-it": {
+    "id": 3169070,
+    "name": "Rome",
+    "latitude": 41.89193,
+    "longitude": 12.51133,
+    "country_code": "IT",
+    "population": 2318895
+  },
+  "naples-it": {
+    "id": 3172394,
+    "name": "Naples",
+    "latitude": 40.85216,
+    "longitude": 14.26811,
+    "country_code": "IT",
+    "population": 909048
+  },
+  "bari-it": {
+    "id": 3182351,
+    "name": "Bari",
+    "latitude": 41.12066,
+    "longitude": 16.86982,
+    "country_code": "IT",
+    "population": 316491
+  },
+  "lecce-it": {
+    "id": 3174953,
+    "name": "Lecce",
+    "latitude": 40.35481,
+    "longitude": 18.17244,
+    "country_code": "IT",
+    "population": 80695
+  },
+  "palermo-it": {
+    "id": 2523920,
+    "name": "Palermo",
+    "latitude": 38.1166,
+    "longitude": 13.3636,
+    "country_code": "IT",
+    "population": 648260
+  },
+  "messina-it": {
+    "id": 2524170,
+    "name": "Messina",
+    "latitude": 38.19394,
+    "longitude": 15.55256,
+    "country_code": "IT",
+    "population": 219948
+  },
+  "catania-it": {
+    "id": 2525068,
+    "name": "Catania",
+    "latitude": 37.49223,
+    "longitude": 15.07041,
+    "country_code": "IT",
+    "population": 311584
+  },
+  "siracusa-it": {
+    "id": 2523083,
+    "name": "Syracuse",
+    "latitude": 37.07542,
+    "longitude": 15.28664,
+    "country_code": "IT",
+    "population": 121605
+  },
+  "cagliari-it": {
+    "id": 2525473,
+    "name": "Cagliari",
+    "latitude": 39.23054,
+    "longitude": 9.11917,
+    "country_code": "IT",
+    "population": 149257
+  },
+  "bastia-fr": {
+    "id": 3034640,
+    "name": "Bastia",
+    "latitude": 42.70219,
+    "longitude": 9.45123,
+    "country_code": "FR",
+    "population": 41001
+  },
+  "ajaccio-fr": {
+    "id": 3038334,
+    "name": "Ajaccio",
+    "latitude": 41.91886,
+    "longitude": 8.73812,
+    "country_code": "FR",
+    "population": 54364
+  },
+  "andorra-la-vella-ad": {
+    "id": 3041563,
+    "name": "Andorra la Vella",
+    "latitude": 42.50779,
+    "longitude": 1.52109,
+    "country_code": "AD",
+    "population": 20430
+  },
+  "a-coruna-es": {
+    "id": 3119841,
+    "name": "A Coruña",
+    "latitude": 43.37135,
+    "longitude": -8.396,
+    "country_code": "ES",
+    "population": 250438
+  },
+  "santiago-de-compostela-es": {
+    "id": 3109642,
+    "name": "Santiago de Compostela",
+    "latitude": 42.88052,
+    "longitude": -8.54569,
+    "country_code": "ES",
+    "population": 99536
+  },
+  "vigo-es": {
+    "id": 3105976,
+    "name": "Vigo",
+    "latitude": 42.23282,
+    "longitude": -8.72264,
+    "country_code": "ES",
+    "population": 293642
+  },
+  "oviedo-es": {
+    "id": 3114711,
+    "name": "Oviedo",
+    "latitude": 43.36029,
+    "longitude": -5.84476,
+    "country_code": "ES",
+    "population": 220027
+  },
+  "santander-es": {
+    "id": 3109718,
+    "name": "Santander",
+    "latitude": 43.46589,
+    "longitude": -3.80493,
+    "country_code": "ES",
+    "population": 173635
+  },
+  "valladolid-es": {
+    "id": 3106672,
+    "name": "Valladolid",
+    "latitude": 41.65541,
+    "longitude": -4.72353,
+    "country_code": "ES",
+    "population": 300618
+  },
+  "salamanca-es": {
+    "id": 3111108,
+    "name": "Salamanca",
+    "latitude": 40.96882,
+    "longitude": -5.66388,
+    "country_code": "ES",
+    "population": 144825
+  },
+  "zaragoza-es": {
+    "id": 3104324,
+    "name": "Zaragoza",
+    "latitude": 41.65606,
+    "longitude": -0.87734,
+    "country_code": "ES",
+    "population": 686986
+  },
+  "barcelona-es": {
+    "id": 3128760,
+    "name": "Barcelona",
+    "latitude": 41.38879,
+    "longitude": 2.15899,
+    "country_code": "ES",
+    "population": 1686208
+  },
+  "madrid-es": {
+    "id": 3117735,
+    "name": "Madrid",
+    "latitude": 40.4165,
+    "longitude": -3.70256,
+    "country_code": "ES",
+    "population": 3255944
+  },
+  "valencia-es": {
+    "id": 2509954,
+    "name": "Valencia",
+    "latitude": 39.47391,
+    "longitude": -0.37966,
+    "country_code": "ES",
+    "population": 824340
+  },
+  "palma-es": {
+    "id": 2512989,
+    "name": "Palma",
+    "latitude": 39.56939,
+    "longitude": 2.65024,
+    "country_code": "ES",
+    "population": 438234
+  },
+  "alicante-es": {
+    "id": 2521978,
+    "name": "Alicante",
+    "latitude": 38.34517,
+    "longitude": -0.48149,
+    "country_code": "ES",
+    "population": 348901
+  },
+  "murcia-es": {
+    "id": 2513416,
+    "name": "Murcia",
+    "latitude": 37.98704,
+    "longitude": -1.13004,
+    "country_code": "ES",
+    "population": 471982
+  },
+  "cordoba-es": {
+    "id": 2519240,
+    "name": "Córdoba",
+    "latitude": 37.89155,
+    "longitude": -4.77275,
+    "country_code": "ES",
+    "population": 325708
+  },
+  "seville-es": {
+    "id": 2510911,
+    "name": "Seville",
+    "latitude": 37.38283,
+    "longitude": -5.97317,
+    "country_code": "ES",
+    "population": 686741
+  },
+  "granada-es": {
+    "id": 2517117,
+    "name": "Granada",
+    "latitude": 37.18817,
+    "longitude": -3.60667,
+    "country_code": "ES",
+    "population": 233532
+  },
+  "malaga-es": {
+    "id": 2514256,
+    "name": "Málaga",
+    "latitude": 36.72016,
+    "longitude": -4.42034,
+    "country_code": "ES",
+    "population": 592346
+  },
+  "porto-pt": {
+    "id": 2735943,
+    "name": "Porto",
+    "latitude": 41.1485,
+    "longitude": -8.61097,
+    "country_code": "PT",
+    "population": 252687
+  },
+  "coimbra-pt": {
+    "id": 2740637,
+    "name": "Coimbra",
+    "latitude": 40.20686,
+    "longitude": -8.41996,
+    "country_code": "PT",
+    "population": 140796
+  },
+  "lisbon-pt": {
+    "id": 2267057,
+    "name": "Lisbon",
+    "latitude": 38.72509,
+    "longitude": -9.1498,
+    "country_code": "PT",
+    "population": 517802
+  },
+  "faro-pt": {
+    "id": 2268339,
+    "name": "Faro",
+    "latitude": 37.01869,
+    "longitude": -7.92716,
+    "country_code": "PT",
+    "population": 70347
+  },
+  "zaporizhzhia-ua": {
+    "id": 687700,
+    "name": "Zaporizhzhya",
+    "latitude": 47.85167,
+    "longitude": 35.11714,
+    "country_code": "UA",
+    "population": 710052
+  },
+  "patras-gr": {
+    "id": 255683,
+    "name": "Pátrai",
+    "latitude": 38.2462,
+    "longitude": 21.73508,
+    "country_code": "GR",
+    "population": 168034
+  }
+}

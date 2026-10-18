@@ -11,3 +11,15 @@ REQUEST_TIMEOUT_SECONDS = 5
 MAX_DATA_AGE_SECONDS = 3600
 WIND_THRESHOLD_KMH = 18  # 5 m/s
 SUN_MAX_CLOUD_PCT = 60
+
+# The original four-city catalogue remains available at ?map=legacy.
+import json
+from pathlib import Path
+_catalog_dir = Path(__file__).resolve().parent
+_layout = json.loads((_catalog_dir / "map-layout.json").read_text(encoding="utf-8"))
+_locations = json.loads((_catalog_dir / "map-geocoding.json").read_text(encoding="utf-8"))
+EUROPE_CITIES = tuple(
+    {"id": c["id"], "name": c["name"], "latitude": _locations[c["id"]]["latitude"],
+     "longitude": _locations[c["id"]]["longitude"]}
+    for c in _layout
+)
