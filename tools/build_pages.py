@@ -3,6 +3,8 @@ import argparse
 import json
 from pathlib import Path
 import sys
+from time import sleep
+from urllib.error import HTTPError, URLError
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -20,11 +22,28 @@ PAGES_CITIES = EUROPE_CITIES + tuple(
 )
 
 
-def build_site(output, batch_fetcher=fetch_many):
+def fetch_pages_weather(cities):
+    """Allow slower CI networking; retry only transient failures, once."""
+    result = fetch_many(cities, timeout=30)
+    def transient(error):
+        if isinstance(error, HTTPError):
+            return error.code in {408, 429} or 500 <= error.code < 600
+        return isinstance(error, (URLError, OSError))
+    failed = [c for c in cities if transient(result.get(c['id']))]
+    if failed:
+        print(f"Retrying {len(failed)} cities after 60 seconds due to network errors", flush=True)
+        sleep(60)
+        result.update(fetch_many(failed, timeout=30))
+    return result
+
+
+def build_site(output, batch_fetcher=fetch_pages_weather):
     """Reject failed/partial refreshes before touching any previously built files."""
     payload = WeatherService(cities=PAGES_CITIES, batch_fetcher=batch_fetcher).get_weather()
     if payload["status"] != "ok" or len(payload["cities"]) != len(PAGES_CITIES):
-        raise ValueError("Incomplete or stale weather: keeping the previous site unchanged")
+        failed = [f"{c['id']} ({c['status']})" for c in payload['cities'] if c['status'] != 'fresh']
+        raise ValueError("Incomplete or stale weather: keeping the previous site unchanged; "
+                         f"{len(failed)} affected cities: " + ", ".join(failed[:8]))
     payload["refresh_interval_seconds"] = 3600
     payload["retry_interval_seconds"] = 60
     # Use a fixed allowlist: no source code, local settings, archives or secrets.

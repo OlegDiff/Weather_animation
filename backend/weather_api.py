@@ -36,7 +36,7 @@ def fetch_current(city):
 
 
 
-def fetch_many(cities):
+def fetch_many(cities, timeout=REQUEST_TIMEOUT_SECONDS):
     """Fetch small batches concurrently; failures remain local to a batch."""
     if not cities:
         return {}
@@ -50,7 +50,7 @@ def fetch_many(cities):
             "wind_speed_unit": "kmh", "precipitation_unit": "mm",
         }
         with urlopen("https://api.open-meteo.com/v1/forecast?" + urlencode(params),
-                     timeout=REQUEST_TIMEOUT_SECONDS) as response:
+                     timeout=timeout) as response:
             values = json.load(response)
         if len(chunk) == 1 and isinstance(values, dict):
             values = [values]
