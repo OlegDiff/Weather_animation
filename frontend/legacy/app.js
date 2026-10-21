@@ -118,6 +118,12 @@ function showExplanations(connectionFailed){
  });
 }
 function showWeather(connectionFailed=false){
+ if(root.dataset.weatherUrl){
+  const maxAge=Number(root.dataset.maxAgeSeconds)*1000;
+  for(const data of liveValues.values()){
+   if(data.status==='fresh'&&Date.now()-Date.parse(data.data_time)>maxAge)data.status='stale';
+  }
+ }
  showExplanations(connectionFailed);
  weatherRows.replaceChildren();
  cities.forEach((city,i)=>{
@@ -134,6 +140,13 @@ function showWeather(connectionFailed=false){
 function applyWeather(payload){
  if(!payload||payload.mode!=='live'||!Array.isArray(payload.cities))throw new Error('Invalid weather response');
  const incoming=new Map(payload.cities.filter(c=>c&&typeof c.id==='string').map(c=>[c.id,c]));
+ if(root.dataset.weatherUrl){
+  // The Europe catalogue appends country codes; the preserved map uses short ids.
+  cityIds.forEach(id=>{
+   const value=payload.cities.find(c=>c?.id===id||c?.id===id+'-'+({dublin:'ie',helsinki:'fi',paris:'fr',madrid:'es'}[id]));
+   if(value)incoming.set(id,value);
+  });
+ }
  cities.forEach((city,i)=>{
   const value=incoming.get(cityIds[i]);
   const valid=value&&['fresh','stale'].includes(value.status)&&
@@ -149,8 +162,8 @@ function applyWeather(payload){
  const degraded=[...liveValues.values()].some(c=>c.status!=='fresh');
  root.querySelector('[data-status]').textContent=degraded?
   'Реальная погода · часть данных недоступна или устарела':
-  'Реальная погода · обновление раз в 10 минут';
- return degraded?60000:600000;
+  (root.dataset.weatherUrl?'Реальная погода · данные обновляются раз в час':'Реальная погода · обновление раз в 10 минут');
+ return root.dataset.weatherUrl?60000:(degraded?60000:600000);
 }
 async function refreshWeather(version){
  const controller=new AbortController();
@@ -158,7 +171,7 @@ async function refreshWeather(version){
  const timeout=setTimeout(()=>controller.abort(),30000);
  let delay=60000;
  try{
-  const response=await fetch('/api/weather?map=legacy',{signal:controller.signal,cache:'no-store'});
+  const response=await fetch(root.dataset.weatherUrl||'../api/weather?map=legacy',{signal:controller.signal,cache:'no-store'});
   if(!response.ok)throw new Error('Weather HTTP '+response.status);
   const data=await response.json();
   if(mode!=='live'||version!==generation)return;

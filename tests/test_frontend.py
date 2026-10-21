@@ -13,6 +13,68 @@ pytestmark = pytest.mark.skipif(os.getenv("WEATHER_BROWSER_TESTS") != "1", reaso
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_pages_subdirectory_demo_live_legacy_and_old_data(browser_site, tmp_path):
+    from functools import partial
+    from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+    from threading import Thread
+    from playwright.sync_api import expect
+    from tools.build_pages import build_site
+    from test_pages import weather_batch
+
+    site = tmp_path / 'Weather_animation'
+    build_site(site, weather_batch)
+    class QuietHandler(SimpleHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+    server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(tmp_path)))
+    worker = Thread(target=server.serve_forever, daemon=True)
+    worker.start()
+    context = browser_site[0].new_context(viewport={'width': 390, 'height': 844})
+    page = context.new_page()
+    errors = []
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    requests = []
+    page.on('request', lambda request: requests.append(request.url))
+    url = f'http://127.0.0.1:{server.server_port}/Weather_animation/'
+    try:
+        for path, count in [('', 175), ('legacy/', 4)]:
+            requests.clear()
+            page.goto(url + path)
+            expect(page.locator('[data-next]')).to_be_enabled()
+            assert not any('weather.json' in request or '/api/' in request for request in requests)
+            page.locator('[data-pause]').click()
+            expect(page.locator('[data-pause]')).to_have_text('Продолжить')
+            page.locator('[data-mode]').select_option('live')
+            expect(page.locator('[data-weather-rows] li')).to_have_count(count)
+            expect(page.locator('[data-status]')).to_contain_text('раз в час')
+            assert 'нет данных' not in page.locator('[data-weather-rows]').inner_text()
+            assert not any('/api/' in request for request in requests)
+            page.locator('[data-mode]').select_option('demo')
+            expect(page.locator('[data-next]')).to_be_enabled()
+
+        page.goto(url)
+        page.clock.install()
+        page.locator('[data-mode]').select_option('live')
+        expect(page.locator('[data-status]')).to_contain_text('раз в час')
+        page.clock.fast_forward(3601000)
+        expect(page.locator('[data-status]')).to_contain_text('устарела')
+        expect(page.locator('[data-weather-rows] li').first).to_contain_text('устаревшие')
+        page.route('**/data/weather.json', lambda route: route.abort())
+        page.clock.fast_forward(60000)
+        expect(page.locator('[data-status]')).to_contain_text('Не удалось')
+        expect(page.locator('[data-weather-rows] li').first).to_contain_text('связь потеряна')
+        page.unroute('**/data/weather.json')
+        page.route('**/data/weather.json', lambda route: route.fulfill(json={'mode': 'live', 'cities': []}))
+        page.clock.fast_forward(60000)
+        expect(page.locator('[data-weather-rows] li').first).to_contain_text('нет данных')
+        assert not errors
+    finally:
+        context.close()
+        server.shutdown()
+        server.server_close()
+        worker.join(timeout=5)
+
+
 @pytest.fixture(scope="module")
 def browser_site():
     from playwright.sync_api import sync_playwright
@@ -205,7 +267,7 @@ def test_europe_five_stage_cycle_and_transitions(browser_site):
             };
         }""")
         # The automatic timer enters stage two, then cities change gradually.
-        page.clock.run_for(18500)
+        page.clock.run_for(6500)
         expect(page.locator("[data-status]")).to_contain_text("2 / 5")
         page.clock.run_for(3000)
         assert page.evaluate("window.sawBlend")
@@ -217,7 +279,7 @@ def test_europe_five_stage_cycle_and_transitions(browser_site):
         assert canvas.evaluate("c=>c.toDataURL()") == frozen
         assert effects() == frozen_label
         page.locator("[data-pause]").click()
-        page.clock.run_for(5500)
+        page.clock.run_for(500)
         second = effects()
         assert all((second[c["name"]] == "снег") == (c["latitude"] >= 57) for c in catalog)
         assert list(second.values()).count("снег") < list(first.values()).count("снег")
@@ -225,7 +287,7 @@ def test_europe_five_stage_cycle_and_transitions(browser_site):
         for stage in (3, 4, 5, 1):
             page.locator("[data-next]").click()
             expect(page.locator("[data-status]")).to_contain_text(f"{stage} / 5")
-            page.clock.run_for(8500)
+            page.clock.run_for(3500)
             stages[stage] = effects()
         assert list(stages[3].values()).count("солнце") > len(catalog) * .6
         assert "снег" not in stages[3].values()

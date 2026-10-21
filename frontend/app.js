@@ -209,6 +209,12 @@ function showExplanations(connectionFailed){
  });
 }
 function showWeather(connectionFailed=false){
+ if(root.dataset.weatherUrl){
+  const maxAge=Number(root.dataset.maxAgeSeconds)*1000;
+  for(const data of liveValues.values()){
+   if(data.status==='fresh'&&Date.now()-Date.parse(data.data_time)>maxAge)data.status='stale';
+  }
+ }
  showExplanations(connectionFailed);
  weatherRows.replaceChildren();
  cities.forEach((city,i)=>{
@@ -240,8 +246,8 @@ function applyWeather(payload){
  const degraded=[...liveValues.values()].some(c=>c.status!=='fresh');
  root.querySelector('[data-status]').textContent=degraded?
   'Реальная погода · часть данных недоступна или устарела':
-  'Реальная погода · обновление раз в 10 минут';
- return degraded?60000:600000;
+  (root.dataset.weatherUrl?'Реальная погода · данные обновляются раз в час':'Реальная погода · обновление раз в 10 минут');
+ return root.dataset.weatherUrl?60000:(degraded?60000:600000);
 }
 async function refreshWeather(version){
  const controller=new AbortController();
@@ -249,7 +255,7 @@ async function refreshWeather(version){
  const timeout=setTimeout(()=>controller.abort(),45000);
  let delay=60000;
  try{
-  const response=await fetch('/api/weather?map=europe',{signal:controller.signal,cache:'no-store'});
+  const response=await fetch(root.dataset.weatherUrl||'api/weather?map=europe',{signal:controller.signal,cache:'no-store'});
   if(!response.ok)throw new Error('Weather HTTP '+response.status);
   const data=await response.json();
   if(mode!=='live'||version!==generation)return;
