@@ -1,4 +1,4 @@
-body{box-sizing:border-box;min-height:100svh;display:flex;margin:0;padding:20px;font:14px system-ui,sans-serif;background:#fff;color:#333}
+body{box-sizing:border-box;min-height:100svh;display:flex;margin:0;padding:20px;font:14px 'Poppins',sans-serif;background:#fff;color:#333}
 #weather-map{width:100%;min-width:0;margin:auto}
 .map-canvas{display:block;width:var(--map-display-width,100%);max-width:100%;height:auto;aspect-ratio:16/9;margin-inline:auto;background:#fff}
 .map-controls{display:flex;align-items:center;justify-content:center;gap:24px 40px;flex-wrap:wrap;padding:20px 0 8px}
