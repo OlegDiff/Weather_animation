@@ -13,6 +13,54 @@ pytestmark = pytest.mark.skipif(os.getenv("WEATHER_BROWSER_TESTS") != "1", reaso
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_combined_wind_weather_and_curved_legend(browser_site):
+    from backend.config import EUROPE_CITIES
+    from backend.weather_logic import normalize
+    from test_weather import payload
+    from playwright.sync_api import expect
+    browser, url = browser_site
+    context = browser.new_context()
+    page = context.new_page()
+    errors = []
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    changes = [dict(rain=.3), dict(snowfall=.2), dict(cloud_cover=90)]
+    values = [{**city, **normalize(payload(**changes[i % 3], wind_speed_10m=25)),
+               'status': 'fresh'} for i, city in enumerate(EUROPE_CITIES)]
+    response = {'mode': 'live', 'cities': values}
+    page.route('**/api/weather?*', lambda route: route.fulfill(json=response))
+    try:
+        page.goto(url)
+        page.evaluate('''()=>{
+            window.bentLayers=new Set();
+            const draw=CanvasRenderingContext2D.prototype.drawImage;
+            CanvasRenderingContext2D.prototype.drawImage=function(image,...args){
+                if(this.canvas===document.querySelector('main>canvas')&&args.length===8&&
+                   args[3]===1&&image.width>48)window.bentLayers.add(image);
+                return draw.call(this,image,...args);
+            };
+        }''')
+        page.locator('.mode-switch label').filter(has_text='REAL').click()
+        expect(page.locator('[data-status]')).to_have_text('REAL: current weather data')
+        label = page.locator('main>canvas').get_attribute('aria-label')
+        assert ': rain + wind' in label and ': snow + wind' in label and ': cloudy + wind' in label
+        page.wait_for_function('window.bentLayers.size>=175')
+        legend = page.locator('.legend-wind')
+        assert legend.evaluate('c=>c.getContext("2d").getImageData(0,0,48,36).data.some((v,i)=>i%4===3&&v>0)')
+        # A change in wind alone must not leave the previous bending overlay active.
+        for item in values:
+            item['effects'] = [item['effects'][0]]
+            item['effect'] = item['effects'][0]
+        page.locator('.mode-switch label').filter(has_text='DEMO').click()
+        page.locator('.mode-switch label').filter(has_text='REAL').click()
+        expect(page.locator('[data-status]')).to_have_text('REAL: current weather data')
+        assert '+ wind' not in page.locator('main>canvas').get_attribute('aria-label')
+        page.locator('.mode-switch label').filter(has_text='DEMO').click()
+        assert '+ wind' not in page.locator('main>canvas').get_attribute('aria-label')
+        assert not errors
+    finally:
+        context.close()
+
+
 def test_pages_subdirectory_demo_live_legacy_and_old_data(browser_site, tmp_path):
     from functools import partial
     from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer

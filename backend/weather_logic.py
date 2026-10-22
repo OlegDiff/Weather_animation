@@ -1,4 +1,4 @@
-"""Validate Open-Meteo current data and choose a single visual effect."""
+"""Validate Open-Meteo data; keep a primary effect and optional wind overlay."""
 from datetime import datetime, timezone
 from math import isfinite
 
@@ -85,6 +85,17 @@ def select_effect(metrics):
     return select_effect_with_reason(metrics)[0]
 
 
+def select_effects(metrics, primary):
+    """Wind may bend precipitation/cloudy letters at the existing 5 m/s threshold."""
+    if (metrics.get("wind_speed_kmh") or 0) < WIND_THRESHOLD_KMH:
+        return [primary]
+    if primary in {"rain", "snow"}:
+        return [primary, "wind"]
+    if primary == "wind" and (metrics.get("cloud_cover_pct") or 0) > SUN_MAX_CLOUD_PCT:
+        return ["cloudy", "wind"]
+    return [primary]
+
+
 def normalize(payload):
     if not isinstance(payload, dict) or payload.get("error"):
         raise ValueError("Invalid provider response")
@@ -116,6 +127,6 @@ def normalize(payload):
     return {
         **metrics, "data_time": dt.isoformat().replace("+00:00", "Z"),
         "precipitation_interval_seconds": interval,
-        "effect": effect, "effect_reason": reason,
+        "effect": effect, "effects": select_effects(metrics, effect), "effect_reason": reason,
         "missing_fields": [key for key, value in metrics.items() if value is None],
     }

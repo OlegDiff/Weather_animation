@@ -3,7 +3,7 @@
 const root=document.getElementById('weather-map'),canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d');
 // Synthetic geography-based stages; thresholds are visual settings, not forecasts.
 const STAGE_SECONDS=6, FADE_SECONDS=3, SPREAD_SECONDS=0;
-const stageNames=['Снег до середины Европы','Снег отступает на север','Больше солнца','Дожди и облачность','Снег возвращается на север'];
+const stageNames=['Snow across Europe','Snow retreats north','More sunshine','Rain and clouds','Snow returns to the north'];
 function demoEffect(city,stage){
  let hash=0;for(const char of city.id)hash=(hash*31+char.charCodeAt(0))>>>0;
  const patch=(hash%1000)/1000,lat=city.latitude;
@@ -22,7 +22,7 @@ function demoEffect(city,stage){
  return patch<.15?'sun':patch<.58?'rain':'cloudy';
 }
 const sequences=stageNames.map((_,stage)=>window.WEATHER_MAP.cities.map(c=>demoEffect(c,stage)));
-const labels={rain:'дождь',snow:'снег',wind:'ветер',sun:'солнце',cloudy:'пасмурно',neutral:'без эффекта'};
+const labels={rain:'rain',snow:'snow',wind:'wind',sun:'sunny',cloudy:'cloudy',neutral:'no active effect'};
 const map=window.WEATHER_MAP;
 const specs=map.cities.map(c=>[c.name,Math.round(c.x*1600/1672),Math.round(c.y*900/941),Math.round(c.w*1600/1672),Math.round(c.h*900/941),'#151515']);
 
@@ -30,10 +30,11 @@ const make=(w,h)=>{let c=document.createElement('canvas');c.width=w;c.height=h;r
 let scene=0,elapsed=0,time=0,last=0,paused=false;
 let mode='demo',generation=0,refreshTimer=null,activeRequest=null;
 const cityIds=map.cities.map(c=>c.id);
-const modeSelect=root.querySelector('[data-mode]');
-const weatherInfo=root.querySelector('[data-weather-info]');
-const weatherRows=root.querySelector('[data-weather-rows]');
+const modeControls=root.querySelectorAll('[data-mode]');
 const liveValues=new Map();
+const windLegend=root.querySelector('.legend-wind'),windLegendMask=make(48,36);
+const windLegendInk=windLegendMask.getContext('2d');
+windLegendInk.font='bold 26px Arial';windLegendInk.fillStyle='#555';windLegendInk.fillText('Aa',3,30);
 
 const cities=specs.map(([name,x,y,w,h,color])=>{
  const mask=make(w,h),g=mask.getContext('2d',{willReadFrequently:true});g.font=(h<22?'400':'900')+' 150px Arial';let m=g.measureText(name);g.scale(w/m.width,h/(m.actualBoundingBoxAscent+m.actualBoundingBoxDescent));g.fillStyle=color;g.fillText(name,0,m.actualBoundingBoxAscent);
@@ -75,10 +76,11 @@ function applyVisualMetrics(c,data){
  }
 }
 function describeCanvas(){
- canvas.setAttribute('aria-label',cities.map(c=>c.name+': '+labels[c.effect]).join('; '));
+ canvas.setAttribute('aria-label',cities.map(c=>c.name+': '+labels[c.effect]+(c.windActive&&c.effect!=='wind'?' + wind':'')).join('; '));
 }
 function reset(immediate=true){
  cities.forEach((c,i)=>{
+  c.windActive=false;
   c.windScale=c.scale;
   if(immediate){c.transition=null;c.pending=null;setEffect(c,sequences[scene][i],true);}
   else{
@@ -88,7 +90,7 @@ function reset(immediate=true){
    c.pending={effect:sequences[scene][i],at:time+SPREAD_SECONDS*(scene===1?north:1-north)};
   }
  });
- root.querySelector('[data-status]').textContent=`Демо · Стадия ${scene+1} / ${sequences.length} · ${stageNames[scene]} · ${STAGE_SECONDS} секунд`;
+ root.querySelector('[data-status]').textContent=`DEMO: ${stageNames[scene]}`;
  describeCanvas();
 }
 function advanceDemo(){scene=(scene+1)%sequences.length;elapsed=0;reset(false);}
@@ -109,11 +111,32 @@ function updateCity(c,dt){
  }
 }
 function drawCity(c){
- if(!c.transition){draw(c);return;}
+ if(!c.transition){drawLayer(c);return;}
  const t=Math.max(0,Math.min(1,(time-c.transition.start)/FADE_SECONDS));
  const blend=t*t*(3-2*t);
- ctx.save();ctx.globalAlpha=1-blend;draw(c.transition.previous);
- ctx.globalAlpha=blend;draw(c);ctx.restore();
+ ctx.save();ctx.globalAlpha=1-blend;drawLayer(c.transition.previous);
+ ctx.globalAlpha=blend;drawLayer(c);ctx.restore();
+}
+
+function windOffset(c,y){
+ const f=1-y/c.h;
+ return (c.windScale??1)*f*f*(17+11*Math.sin(time*2.4+c.x*.01)+5*Math.sin(time*4+y*.024));
+}
+function drawLayer(c){
+ if(!c.windActive||c.effect==='wind'){draw(c);return;}
+ // Render the complete weather layer first, then bend it without losing its colours or particles.
+ const pad=24,w=c.w+pad*2,h=c.h+pad*2;
+ const layer=c.windTexture||(c.windTexture=make(w,h)),g=layer.getContext('2d');
+ g.clearRect(0,0,w,h);g.save();g.translate(pad-c.x,pad-c.y);draw(c,g);g.restore();
+ for(let y=0;y<h;y++){
+  const dx=windOffset(c,Math.max(0,Math.min(c.h,y-pad)));
+  ctx.drawImage(layer,0,y,w,1,c.x-pad+dx,c.y-pad+y,w,1.4);
+ }
+}
+function drawWindLegend(){
+ const g=windLegend.getContext('2d');g.clearRect(0,0,48,36);
+ const sample={h:36,windScale:.3,x:0};
+ for(let y=0;y<36;y++)g.drawImage(windLegendMask,0,y,48,1,windOffset(sample,y),y,48,1.4);
 }
 
 function ink(c,x,y){return x>=0&&x<c.w&&y>=0&&y<c.h&&c.top[Math.floor(x)]>=0&&y>=c.top[Math.floor(x)]}
@@ -126,9 +149,9 @@ function update(c,dt){const e=c.effect;
  if(e==='sun'||e==='cloudy')for(const p of c.clouds){p.x+=p.v*dt;if(p.x>c.w+p.r*2)p.x=-p.r*2}
 }
 function puff(g,x,y,rx,ry){g.save();g.translate(x,y);g.scale(rx,ry);let grad=g.createRadialGradient(0,0,0,0,0,1);grad.addColorStop(0,'rgba(255,255,255,1)');grad.addColorStop(.65,'rgba(255,255,255,.95)');grad.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=grad;g.beginPath();g.arc(0,0,1,0,TAU);g.fill();g.restore()}
-function draw(c){ctx.save();ctx.translate(c.x,c.y);const e=c.effect;
- if(e==='neutral'){ctx.drawImage(c.mask,0,0)}
- else if(e==='wind'){for(let y=0;y<c.h;y++){let f=1-y/c.h;let dx=(c.windScale??1)*f*f*(17+11*Math.sin(time*2.4+c.x*.01)+5*Math.sin(time*4+y*.024));ctx.drawImage(c.mask,0,y,c.w,1,dx,y,c.w,1.4)}}
+function draw(c,output=ctx){const gctx=output;gctx.save();gctx.translate(c.x,c.y);const e=c.effect;
+ if(e==='neutral'){gctx.drawImage(c.mask,0,0)}
+ else if(e==='wind'){for(let y=0;y<c.h;y++){let dx=windOffset(c,y);gctx.drawImage(c.mask,0,y,c.w,1,dx,y,c.w,1.4)}}
  else if(e==='rain'){
  const g=c.texture.getContext('2d');
  g.clearRect(0,0,c.w,c.h);g.fillStyle='#4263A4';g.fillRect(0,0,c.w,c.h);
@@ -137,18 +160,18 @@ function draw(c){ctx.save();ctx.translate(c.x,c.y);const e=c.effect;
  for(let y=0;y<c.h;y+=2){
   let dx=0;
   for(const hit of c.hits){let age=time-hit.t;dx+=Math.sin(y*.4-age*8)*Math.exp(-age*3)*2*c.scale;}
-  ctx.drawImage(c.texture,0,y,c.w,Math.min(2,c.h-y),dx,y,c.w,Math.min(2,c.h-y));
+  gctx.drawImage(c.texture,0,y,c.w,Math.min(2,c.h-y),dx,y,c.w,Math.min(2,c.h-y));
  }
- ctx.strokeStyle='rgba(43,129,163,.43)';ctx.lineWidth=1.25;for(const p of c.particles){ctx.beginPath();ctx.moveTo(p.x,p.y-10);ctx.lineTo(p.x,p.y);ctx.stroke()}
- for(const hit of c.hits){let age=time-hit.t;ctx.strokeStyle=`rgba(50,146,176,${.16*(1-age/1.4)})`;ctx.beginPath();ctx.ellipse(hit.x,hit.y,age*65,age*26,0,0,TAU);ctx.stroke()}
- for(const p of c.splashes){ctx.fillStyle=`rgba(45,137,176,${1-p.age/.55})`;ctx.beginPath();ctx.arc(p.x,p.y,1.4,0,TAU);ctx.fill()}}
+ gctx.strokeStyle='rgba(43,129,163,.43)';gctx.lineWidth=1.25;for(const p of c.particles){gctx.beginPath();gctx.moveTo(p.x,p.y-10);gctx.lineTo(p.x,p.y);gctx.stroke()}
+ for(const hit of c.hits){let age=time-hit.t;gctx.strokeStyle=`rgba(50,146,176,${.16*(1-age/1.4)})`;gctx.beginPath();gctx.ellipse(hit.x,hit.y,age*65,age*26,0,0,TAU);gctx.stroke()}
+ for(const p of c.splashes){gctx.fillStyle=`rgba(45,137,176,${1-p.age/.55})`;gctx.beginPath();gctx.arc(p.x,p.y,1.4,0,TAU);gctx.fill()}}
  else if(e==='snow'){
  const g=c.texture.getContext('2d');
  g.clearRect(0,0,c.w,c.h);g.fillStyle='#003366';g.fillRect(0,0,c.w,c.h);
  g.globalCompositeOperation='destination-in';g.drawImage(c.mask,0,0);
- g.globalCompositeOperation='source-over';ctx.drawImage(c.texture,0,0);
- ctx.lineCap='round';for(let pass=0;pass<2;pass++)for(let x=1;x<c.w-1;x+=2){if(c.top[x]<0)continue;let thick=c.snowBase+c.depth[x];if(thick<.13)continue;ctx.lineWidth=Math.max(1.35,thick)+(pass===0?1.25:0);ctx.strokeStyle=pass===0?'#8faebb':'#fff';ctx.beginPath();ctx.moveTo(x-1.1,c.top[x]-thick*.51);ctx.lineTo(x+1.1,c.top[x]-thick*.51);ctx.stroke()}
- for(const p of c.particles){ctx.fillStyle='#fff';ctx.strokeStyle='#fff';ctx.lineWidth=.65;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.fill();ctx.stroke()}}
+ g.globalCompositeOperation='source-over';gctx.drawImage(c.texture,0,0);
+ gctx.lineCap='round';for(let pass=0;pass<2;pass++)for(let x=1;x<c.w-1;x+=2){if(c.top[x]<0)continue;let thick=c.snowBase+c.depth[x];if(thick<.13)continue;gctx.lineWidth=Math.max(1.35,thick)+(pass===0?1.25:0);gctx.strokeStyle=pass===0?'#8faebb':'#fff';gctx.beginPath();gctx.moveTo(x-1.1,c.top[x]-thick*.51);gctx.lineTo(x+1.1,c.top[x]-thick*.51);gctx.stroke()}
+ for(const p of c.particles){gctx.fillStyle='#fff';gctx.strokeStyle='#fff';gctx.lineWidth=.65;gctx.beginPath();gctx.arc(p.x,p.y,p.r,0,TAU);gctx.fill();gctx.stroke()}}
  else if(e==='cloudy'){
  const g=c.texture.getContext('2d');
  g.clearRect(0,0,c.w,c.h);g.fillStyle='#999999';g.fillRect(0,0,c.w,c.h);
@@ -159,11 +182,11 @@ function draw(c){ctx.save();ctx.translate(c.x,c.y);const e=c.effect;
   puff(g,p.x+p.r*.32,p.y,p.r*.7,p.r*.4);
  }
  g.restore();g.globalCompositeOperation='destination-in';g.drawImage(c.mask,0,0);
- g.globalCompositeOperation='source-over';ctx.drawImage(c.texture,0,0);
+ g.globalCompositeOperation='source-over';gctx.drawImage(c.texture,0,0);
  }
  else{let g=c.texture.getContext('2d');g.clearRect(0,0,c.w,c.h);let brightness=.93+Math.sin(time*2.1)*.026+Math.sin(time*4.8+.8)*.012;let fill=g.createLinearGradient(0,0,0,c.h);fill.addColorStop(0,`rgb(255,${Math.round(230*brightness)},88)`);fill.addColorStop(.46,`rgb(255,${Math.round(211*brightness)},17)`);fill.addColorStop(1,'#f6b000');g.fillStyle=fill;g.fillRect(0,0,c.w,c.h);
- g.save();g.beginPath();g.rect(0,0,c.w,c.cloudBottom);g.clip();for(const p of c.clouds){puff(g,p.x-p.r*.24,p.y,p.r*.72,p.r*.43);puff(g,p.x,p.y-p.r*.13,p.r*.62,p.r*.53);puff(g,p.x+p.r*.32,p.y,p.r*.7,p.r*.4)}g.restore();g.globalCompositeOperation='destination-in';g.drawImage(c.mask,0,0);g.globalCompositeOperation='source-over';ctx.save();ctx.shadowColor='#ffe283';ctx.shadowBlur=12*c.scale;ctx.drawImage(c.texture,0,0);ctx.restore()}
- ctx.restore();}
+ g.save();g.beginPath();g.rect(0,0,c.w,c.cloudBottom);g.clip();for(const p of c.clouds){puff(g,p.x-p.r*.24,p.y,p.r*.72,p.r*.43);puff(g,p.x,p.y-p.r*.13,p.r*.62,p.r*.53);puff(g,p.x+p.r*.32,p.y,p.r*.7,p.r*.4)}g.restore();g.globalCompositeOperation='destination-in';g.drawImage(c.mask,0,0);g.globalCompositeOperation='source-over';gctx.save();gctx.shadowColor='#ffe283';gctx.shadowBlur=12*c.scale;gctx.drawImage(c.texture,0,0);gctx.restore()}
+ gctx.restore();}
 function render(now){
  const dt=last?Math.min((now-last)/1000,.05):0;last=now;
  if(!paused){
@@ -171,42 +194,9 @@ function render(now){
   if(mode==='demo'){elapsed+=dt;if(elapsed>=STAGE_SECONDS)advanceDemo();}
   cities.forEach(c=>updateCity(c,dt));
  }
- ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);cities.forEach(drawCity);
- root.querySelector('.weather-progress').style.width=elapsed/STAGE_SECONDS*100+'%';
- requestAnimationFrame(render);
-}
-root.querySelector('[data-pause]').onclick=()=>{paused=!paused;root.querySelector('[data-pause]').textContent=paused?'Продолжить':'Пауза'};
-root.querySelector('[data-next]').onclick=()=>{if(mode==='demo')advanceDemo()};
+ ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);cities.forEach(drawCity);drawWindLegend();
 
-function formatTime(value){
- const date=new Date(value);
- return value&&Number.isFinite(date.getTime())?date.toLocaleString('ru-RU'):'нет данных';
-}
-function metric(value,unit){
- return typeof value==='number'&&Number.isFinite(value)?value.toLocaleString('ru-RU')+' '+unit:'нет данных';
-}
-function showExplanations(connectionFailed){
- const container=root.querySelector('[data-weather-explanations]');
- container.replaceChildren();
- cities.forEach((city,i)=>{
-  const data=liveValues.get(cityIds[i]);
-  const section=document.createElement('section');
-  const heading=document.createElement('h3');
-  heading.textContent=city.name+' · '+labels[city.effect];
-  section.append(heading);
-  const add=text=>{const p=document.createElement('p');p.textContent=text;section.append(p);};
-  if(connectionFailed||data?.status==='stale')add('Последние доступные данные: объяснение относится к погоде на '+formatTime(data?.data_time)+'.');
-  const interval=data?.precipitation_interval_seconds;
-  const period=typeof interval==='number'&&Number.isFinite(interval)&&interval>0?
-   'за предыдущие '+metric(interval/60,'мин'):'интервал неизвестен';
-  add('Ветер: '+metric(typeof data?.wind_speed_kmh==='number'?Math.round(data.wind_speed_kmh/3.6*10)/10:null,'м/с')+' ('+metric(data?.wind_speed_kmh,'км/ч')+')'+'; направление: '+metric(data?.wind_direction_deg,'°')+'. Облачность: '+metric(data?.cloud_cover_pct,'%')+'.');
-  add('Осадки ('+period+'): всего '+metric(data?.precipitation_mm,'мм')+
-   '; дождь '+metric(data?.rain_mm,'мм')+'; ливни '+metric(data?.showers_mm,'мм')+'; снег '+metric(data?.snowfall_cm,'см')+'.');
-  add('Код погоды: '+metric(data?.weather_code,'').trim()+'. Время суток: '+(data?.is_day===1?'день':data?.is_day===0?'ночь':'нет данных')+'.');
-  add(typeof data?.effect_reason==='string'&&data.effect_reason?
-   data.effect_reason:data?.data_time?'Причина выбора не получена. Обновите сервер и страницу.':'Погодные данные недоступны. Показана обычная надпись.');
-  container.append(section);
- });
+ requestAnimationFrame(render);
 }
 function showWeather(connectionFailed=false){
  if(root.dataset.weatherUrl){
@@ -215,19 +205,9 @@ function showWeather(connectionFailed=false){
    if(data.status==='fresh'&&Date.now()-Date.parse(data.data_time)>maxAge)data.status='stale';
   }
  }
- showExplanations(connectionFailed);
- weatherRows.replaceChildren();
- cities.forEach((city,i)=>{
-  const data=liveValues.get(cityIds[i]);
-  const row=document.createElement('li');
-  const status=connectionFailed?(data?.data_time?'связь потеряна, последние данные':'нет данных'):
-   ({fresh:'актуальные',stale:'устаревшие',unavailable:'нет данных'}[data?.status]||'нет данных');
-  const temp=typeof data?.temperature_c==='number'&&Number.isFinite(data.temperature_c)?data.temperature_c+' °C':'—';
-  row.textContent=`${city.name}: ${labels[city.effect]} · ${temp} · ${status} · погода на ${formatTime(data?.data_time)}`;
-  if(data?.missing_fields?.length)row.textContent+=' · часть показателей отсутствует';
-  weatherRows.append(row);
- });
+ if(connectionFailed)root.querySelector('[data-status]').textContent='Weather update failed. Showing the last available data; retrying in one minute.';
 }
+
 function applyWeather(payload){
  if(!payload||payload.mode!=='live'||!Array.isArray(payload.cities))throw new Error('Invalid weather response');
  const incoming=new Map(payload.cities.filter(c=>c&&typeof c.id==='string').map(c=>[c.id,c]));
@@ -238,15 +218,19 @@ function applyWeather(payload){
    Object.prototype.hasOwnProperty.call(labels,value.effect);
   const data=valid?value:{status:'unavailable',effect:'neutral',data_time:null};
   liveValues.set(cityIds[i],data);
-  setEffect(city,data.effect);
+  const effects=Array.isArray(data.effects)?data.effects:[data.effect];
+  const base=effects.find(effect=>['rain','snow','cloudy'].includes(effect));
+  const combined=effects.includes('wind')&&Boolean(base);
+  city.windActive=combined;
+  setEffect(city,combined?base:data.effect);
   applyVisualMetrics(city,data);
  });
  describeCanvas();
  showWeather();
  const degraded=[...liveValues.values()].some(c=>c.status!=='fresh');
  root.querySelector('[data-status]').textContent=degraded?
-  'Реальная погода · часть данных недоступна или устарела':
-  (root.dataset.weatherUrl?'Реальная погода · данные обновляются раз в час':'Реальная погода · обновление раз в 10 минут');
+  'REAL: some weather data is unavailable or outdated':
+  'REAL: current weather data';
  return root.dataset.weatherUrl?60000:(degraded?60000:600000);
 }
 async function refreshWeather(version){
@@ -262,7 +246,7 @@ async function refreshWeather(version){
   delay=applyWeather(data);
  }catch(error){
   if(mode!=='live'||version!==generation)return;
-  root.querySelector('[data-status]').textContent='Не удалось обновить погоду · повтор через минуту';
+
   showWeather(true);
  }finally{
   clearTimeout(timeout);
@@ -270,27 +254,27 @@ async function refreshWeather(version){
   if(mode==='live'&&version===generation)refreshTimer=setTimeout(()=>refreshWeather(version),delay);
  }
 }
-modeSelect.addEventListener('change',()=>{
- mode=modeSelect.value;
+function changeMode(nextMode){
+ mode=nextMode;
+ modeControls.forEach(control=>{control.checked=control.value===mode});
  generation++;
  clearTimeout(refreshTimer);
  activeRequest?.abort();
- root.querySelector('[data-next]').disabled=mode==='live';
- root.querySelector('.weather-track').hidden=mode==='live';
- weatherInfo.hidden=mode!=='live';
  if(mode==='demo'){
   scene=0;elapsed=0;reset();
  }else{
   liveValues.clear();
-  cities.forEach(c=>{c.pending=null;c.transition=null;setEffect(c,'neutral')});
+  cities.forEach(c=>{c.pending=null;c.transition=null;c.windActive=false;setEffect(c,'neutral')});
   describeCanvas();showWeather();
-  root.querySelector('[data-status]').textContent='Загрузка реальной погоды…';
+  root.querySelector('[data-status]').textContent='Loading real weather...';
   refreshWeather(generation);
  }
-});
+}
+modeControls.forEach(control=>control.addEventListener('change',()=>changeMode(control.value)));
 if(location.protocol==='file:'){
- modeSelect.querySelector('[value="live"]').disabled=true;
- root.querySelector('[data-local-hint]').hidden=false;
+ const realControl=root.querySelector('[data-mode][value="live"]');
+ realControl.disabled=true;
+ realControl.closest('label').title='REAL requires an HTTP server';
 }
 canvas.addEventListener('pointermove',event=>{
  const box=canvas.getBoundingClientRect(),x=(event.clientX-box.left)*canvas.width/box.width,y=(event.clientY-box.top)*canvas.height/box.height;
@@ -299,6 +283,6 @@ canvas.addEventListener('pointermove',event=>{
 });
 reset();requestAnimationFrame(render);
 if(new URLSearchParams(location.search).get('mode')==='live'&&location.protocol!=='file:'){
- modeSelect.value='live';modeSelect.dispatchEvent(new Event('change'));
+ changeMode('live');
 }
 })();

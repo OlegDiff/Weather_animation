@@ -196,3 +196,22 @@ def test_madrid_cloud_code_does_not_override_cover(cloud, day, rain, wind, effec
 ])
 def test_cloudy_priority(changes, effect):
     assert normalize(payload(**changes))["effect"] == effect
+
+
+@pytest.mark.parametrize('changes,effects', [
+    ({'rain': .3, 'wind_speed_10m': 18}, ['rain', 'wind']),
+    ({'snowfall': .2, 'wind_speed_10m': 40}, ['snow', 'wind']),
+    ({'weather_code': 85, 'wind_speed_10m': 18}, ['snow', 'wind']),
+    ({'cloud_cover': 90, 'wind_speed_10m': 18}, ['cloudy', 'wind']),
+    ({'cloud_cover': 90, 'is_day': 0, 'wind_speed_10m': 18}, ['cloudy', 'wind']),
+    ({'rain': .3, 'wind_speed_10m': 17.99}, ['rain']),
+    ({'snowfall': .2, 'wind_speed_10m': None}, ['snow']),
+    ({'cloud_cover': 90, 'wind_speed_10m': 17.99}, ['cloudy']),
+    ({'cloud_cover': 60, 'wind_speed_10m': 18}, ['wind']),
+    ({}, ['sun']),
+])
+def test_wind_can_combine_with_precipitation_and_clouds(changes, effects):
+    result = normalize(payload(**changes))
+    assert result['effects'] == effects
+    # Existing consumers, including legacy, still receive the original primary effect.
+    assert result['effect'] == select_effect(result)

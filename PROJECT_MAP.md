@@ -16,7 +16,7 @@
 |---|---|---|
 | Изменить дождь (капли, брызги, синие буквы, волны) | `frontend/app.js`: `particle`, `setEffect`, `update`, `draw` (ветка `rain`) | `tests/test_frontend.py` |
 | Изменить снег (хлопья, накопление, цвет) | `frontend/app.js`: `particle`, `setEffect`, `update`, `draw` (ветка `snow`) | `tests/test_frontend.py` |
-| Изменить ветер (изгиб, колебания, интенсивность) | `frontend/app.js`: `draw` (ветка `wind`), `applyVisualMetrics` | `tests/test_frontend.py` |
+| Изменить ветер (изгиб, колебания, интенсивность) | `frontend/app.js`: `windOffset`, `drawLayer`, `drawWindLegend`, `draw`, `applyVisualMetrics` | `tests/test_frontend.py` |
 | Изменить солнце (цвет, мерцание, подсветка, облака) | `frontend/app.js`: `draw` (заключительная ветка `sun`), `puff`, `update` | `tests/test_frontend.py` |
 | Изменить пасмурность (серые буквы, облака) | `frontend/app.js`: `draw` (ветка `cloudy`), `puff`, `applyVisualMetrics` | `tests/test_frontend.py` |
 | Изменить форму букв, шрифт **внутри карты** или формирование маски | `frontend/app.js`: `specs`, `cities=specs.map(...)`, `mask` | `backend/map-layout.json`, если меняются размеры подписей |
@@ -29,11 +29,11 @@
 | Изменить размер Canvas / пропорции карты | `frontend/index.html`, `frontend/style.css`, `frontend/app.js` (коэффициенты масштаба в `specs`) | `tools/build_city_map.py`, `backend/map-layout.json`, `tests/test_europe_map.py` |
 | Изменить элементы интерфейса, подписи кнопок, ссылки | `frontend/index.html` | `frontend/app.js`, если меняется поведение |
 | Изменить внешние отступы, ширину страницы, кнопки, раскрывающиеся панели | `frontend/style.css` | `frontend/index.html` |
-| Изменить кнопки Пауза/Следующая сцена, переключатель демо/live | `frontend/app.js`: обработчики `onclick`, `modeSelect.addEventListener` | `frontend/index.html`, `tests/test_frontend.py` |
+| Изменить переключатель DEMO / REAL основной карты | `frontend/app.js`: `modeControls`, `changeMode` | `frontend/index.html`, `frontend/style.css` |
 | Изменить подсказки города при наведении | `frontend/app.js`: `canvas.addEventListener('pointermove', ...)` | — |
-| Изменить отображение погодных показателей, статус, объяснения | `frontend/app.js`: `showWeather`, `showExplanations`, `formatTime`, `metric` | `frontend/index.html` для HTML-контейнеров |
+| Изменить легенду и источник основной карты | `frontend/index.html`, `frontend/style.css` | `frontend/app.js`: `labels`, `showWeather` для доступных статусов; подробные панели сохранены только в legacy |
 | Изменить запрос браузера к погодному API или частоту опроса | `frontend/app.js`: `applyWeather`, `refreshWeather` | `backend/main.py` при изменении маршрута/параметра; `backend/weather_api.py` для серверного кеша |
-| Изменить **правила**, по которым погода превращается в эффект | `backend/weather_logic.py`: `select_effect_with_reason`, `select_effect` | `backend/config.py` для порогов, `tests/test_weather.py` |
+| Изменить **правила**, по которым погода превращается в эффект | `backend/weather_logic.py`: `select_effect_with_reason`, `select_effect`, `select_effects` (сочетания ветра с дождём/снегом/облачностью) | `backend/config.py` для порогов, `tests/test_weather.py` |
 | Изменить порог ветра, порог облачности, кеш, повторы, таймауты | `backend/config.py` | `tests/test_weather.py`; `backend/weather_api.py` только если меняется механизм |
 | Изменить набор погодных параметров, валидацию или преобразование Open-Meteo | `backend/weather_logic.py`: `FIELDS`, `normalize` | `backend/weather_api.py` (параметры запроса), `frontend/app.js` (если меняется JSON-контракт), `tests/test_weather.py` |
 | Изменить поставщика погоды, сетевые запросы, обработку ответов | `backend/weather_api.py`: `fetch_current`, `fetch_many` | `backend/weather_logic.py`, `tests/test_europe_map.py` |
@@ -65,9 +65,9 @@
 
 ### `frontend/` — браузер и визуальная часть
 
-- **`frontend/app.js`** — основной большой JS-модуль (самовызываемая функция). `demoEffect` распределяет синтетическую погоду по сценам; `specs` и `cities` создают надписи из `window.WEATHER_MAP`; `particle` / `setEffect` / `applyVisualMetrics` настраивают эффекты; `update` изменяет состояние частиц и снега; `puff` рисует облако; `draw` отрисовывает все погодные эффекты на Canvas; `render` запускает цикл `requestAnimationFrame`; `showWeather` / `showExplanations` показывают информацию; `applyWeather` / `refreshWeather` обрабатывают API; обработчики внизу файла управляют режимами, кнопками и наведением. **Примечание:** отдельного `weather-effects.js` сейчас нет.
+- **`frontend/app.js`** — основной большой JS-модуль (самовызываемая функция). `demoEffect` распределяет синтетическую погоду по сценам; `specs` и `cities` создают надписи из `window.WEATHER_MAP`; `particle` / `setEffect` / `applyVisualMetrics` настраивают эффекты; `update` изменяет состояние частиц и снега; `puff` рисует облако; `draw` отрисовывает все погодные эффекты на Canvas; `render` запускает цикл `requestAnimationFrame`; `showWeather` проверяет возраст данных и сообщает о сбоях через скрытый доступный статус; `applyWeather` / `refreshWeather` обрабатывают API; `changeMode` управляет DEMO / REAL. Подсказки и доступные подписи — на английском. **Примечание:** отдельного `weather-effects.js` сейчас нет.
 - **`frontend/map-cities.js`** — **сгенерированный** JS-каталог (`window.WEATHER_MAP`), 175 городов, размеры исходной композиции и географические координаты. Не редактировать вручную: исходники — два JSON-файла в `backend/`.
-- **`frontend/index.html`** — главная HTML-страница, Canvas 1600×900, навигация, панель режимов, погодные данные. Подключает `map-cities.js`, затем `app.js`.
+- **`frontend/index.html`** — главная HTML-страница на английском: Canvas 1600×900, переключатель DEMO / REAL, легенда пяти эффектов и источник Open-Meteo. Подключает `map-cities.js`, затем `app.js`.
 - **`frontend/style.css`** — оформление внешнего интерфейса, максимальная ширина 1600px, соотношение Canvas 16:9. **Цвета погодных букв и эффекты задаёт JS, не CSS.**
 
 ### `frontend/legacy/` — сохранённая старая версия
