@@ -1,5 +1,5 @@
 
-(()=>{'use strict';
+(async()=>{'use strict';
 const root=document.getElementById('weather-map'),canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d');
 function fitMapToScreen(){
  const viewportHeight=window.visualViewport?.height??window.innerHeight;
@@ -30,6 +30,16 @@ const layoutObserver=new ResizeObserver(fitMapToScreen);
 layoutObserver.observe(root.querySelector('.map-controls'));
 layoutObserver.observe(root.querySelector('.data-source'));
 fitMapToScreen();
+// Canvas masks retain their pixels: load every required weight before measuring text.
+const cityText=window.WEATHER_MAP.cities.map(city=>city.name).join(' ');
+let mapFont='Arial';
+try{
+ const fonts=await Promise.all([400,700,900].map(weight=>document.fonts.load(`${weight} 150px Poppins`,cityText)));
+ if(fonts.every(faces=>faces.length>0))mapFont='Poppins';
+}catch(error){
+ console.warn('Poppins could not be loaded; using Arial for the map.',error);
+}
+root.dataset.mapFont=mapFont;
 // Synthetic geography-based stages; thresholds are visual settings, not forecasts.
 const STAGE_SECONDS=6, FADE_SECONDS=3, SPREAD_SECONDS=0;
 const stageNames=['Snow across Europe','Snow retreats north','More sunshine','Rain and clouds','Snow returns to the north'];
@@ -63,10 +73,10 @@ const modeControls=root.querySelectorAll('[data-mode]');
 const liveValues=new Map();
 const windLegend=root.querySelector('.legend-wind'),windLegendMask=make(48,36);
 const windLegendInk=windLegendMask.getContext('2d');
-windLegendInk.font='bold 26px Arial';windLegendInk.fillStyle='#555';windLegendInk.fillText('Aa',3,30);
+windLegendInk.font=`700 26px ${mapFont}`;windLegendInk.fillStyle='#555';windLegendInk.fillText('Aa',3,30);
 
 const cities=specs.map(([name,x,y,w,h,color])=>{
- const mask=make(w,h),g=mask.getContext('2d',{willReadFrequently:true});g.font=(h<22?'400':'900')+' 150px Arial';let m=g.measureText(name);g.scale(w/m.width,h/(m.actualBoundingBoxAscent+m.actualBoundingBoxDescent));g.fillStyle=color;g.fillText(name,0,m.actualBoundingBoxAscent);
+ const mask=make(w,h),g=mask.getContext('2d',{willReadFrequently:true});g.font=(h<22?'400':'900')+' 150px '+mapFont;let m=g.measureText(name);g.scale(w/m.width,h/(m.actualBoundingBoxAscent+m.actualBoundingBoxDescent));g.fillStyle=color;g.fillText(name,0,m.actualBoundingBoxAscent);
  // The lower cloud edge is halfway down the lowercase x-height.
  const cloudBottom=h*(m.actualBoundingBoxAscent-g.measureText('x').actualBoundingBoxAscent/2)/(m.actualBoundingBoxAscent+m.actualBoundingBoxDescent);
  if(name==='Santiago de Compostela'){
