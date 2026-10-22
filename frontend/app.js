@@ -6,6 +6,10 @@ function fitMapToScreen(){
  const controls=root.querySelector('.map-controls'),source=root.querySelector('.data-source');
  const sourceStyle=getComputedStyle(source);
  const viewportHeight=window.visualViewport?.height??window.innerHeight;
+ if(window.matchMedia('(orientation: landscape) and (hover: none) and (pointer: coarse)').matches){
+  root.style.setProperty('--map-display-width',viewportHeight*canvas.width/canvas.height+'px');
+  return;
+ }
  const availableHeight=Math.max(1,viewportHeight-parseFloat(bodyStyle.paddingTop)-parseFloat(bodyStyle.paddingBottom)
   -controls.getBoundingClientRect().height-source.getBoundingClientRect().height
   -parseFloat(sourceStyle.marginTop)-parseFloat(sourceStyle.marginBottom));
