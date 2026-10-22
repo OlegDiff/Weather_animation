@@ -2,14 +2,22 @@
 (()=>{'use strict';
 const root=document.getElementById('weather-map'),canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d');
 function fitMapToScreen(){
+ const viewportHeight=window.visualViewport?.height??window.innerHeight;
+ const touchDevice=navigator.maxTouchPoints>0||window.matchMedia('(any-pointer: coarse)').matches||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+ const mobile=touchDevice&&Math.min(window.innerWidth,window.innerHeight)<=1024;
+ document.body.classList.toggle('mobile-map',mobile);
+ const viewportWidth=document.documentElement.clientWidth;
+ const rotated=mobile&&viewportWidth<viewportHeight;
+ root.classList.toggle('map-rotated',rotated);
+ if(mobile){
+  root.style.setProperty('--map-viewport-height',viewportHeight+'px');
+  const width=rotated?Math.min(viewportHeight,viewportWidth*canvas.width/canvas.height):viewportHeight*canvas.width/canvas.height;
+  root.style.setProperty('--map-display-width',width+'px');
+  return;
+ }
  const bodyStyle=getComputedStyle(document.body);
  const controls=root.querySelector('.map-controls'),source=root.querySelector('.data-source');
  const sourceStyle=getComputedStyle(source);
- const viewportHeight=window.visualViewport?.height??window.innerHeight;
- if(window.matchMedia('(orientation: landscape) and (hover: none) and (pointer: coarse)').matches){
-  root.style.setProperty('--map-display-width',viewportHeight*canvas.width/canvas.height+'px');
-  return;
- }
  const availableHeight=Math.max(1,viewportHeight-parseFloat(bodyStyle.paddingTop)-parseFloat(bodyStyle.paddingBottom)
   -controls.getBoundingClientRect().height-source.getBoundingClientRect().height
   -parseFloat(sourceStyle.marginTop)-parseFloat(sourceStyle.marginBottom));
@@ -298,7 +306,9 @@ if(location.protocol==='file:'){
  realControl.closest('label').title='REAL requires an HTTP server';
 }
 canvas.addEventListener('pointermove',event=>{
- const box=canvas.getBoundingClientRect(),x=(event.clientX-box.left)*canvas.width/box.width,y=(event.clientY-box.top)*canvas.height/box.height;
+ const box=canvas.getBoundingClientRect(),u=(event.clientX-box.left)/box.width,v=(event.clientY-box.top)/box.height;
+ const rotated=root.classList.contains('map-rotated');
+ const x=(rotated?v:u)*canvas.width,y=(rotated?1-u:v)*canvas.height;
  const city=cities.find(c=>x>=c.x&&x<=c.x+c.w&&y>=c.y&&y<=c.y+c.h);
  canvas.title=city?city.name+' · '+labels[city.effect]:'';
 });

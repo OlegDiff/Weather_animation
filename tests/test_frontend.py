@@ -13,6 +13,65 @@ pytestmark = pytest.mark.skipif(os.getenv("WEATHER_BROWSER_TESTS") != "1", reaso
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_mobile_map_uses_own_viewport_and_rotates_on_open(browser_site):
+    browser, url = browser_site
+    profiles = [
+        {'has_touch': True, 'is_mobile': True},
+        # Touch laptops/tablets may identify themselves with a desktop user agent.
+        {'has_touch': True, 'is_mobile': False},
+        {'has_touch': False, 'is_mobile': True, 'user_agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Mobile Safari/604.1'},
+    ]
+    for profile in profiles:
+        context = browser.new_context(viewport={'width': 390, 'height': 844}, **profile)
+        page = context.new_page()
+        errors = []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        try:
+            page.goto(url)
+            for width, height in [(390, 844), (844, 390), (667, 375), (1024, 768), (390, 844)]:
+                page.set_viewport_size({'width': width, 'height': height})
+                page.evaluate('()=>new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done)))')
+                layout = page.evaluate('''()=>{
+                    const map=document.querySelector('.map-canvas').getBoundingClientRect();
+                    const viewport=document.querySelector('.map-viewport').getBoundingClientRect();
+                    return {height:viewport.height,top:viewport.top,screen:visualViewport.height,
+                        mapHeight:map.height,mapWidth:map.width,
+                        rotated:document.querySelector('main').classList.contains('map-rotated'),
+                        controlsTop:document.querySelector('.map-controls').getBoundingClientRect().top,
+                        overflow:document.documentElement.scrollWidth>innerWidth};
+                }''')
+                assert abs(layout['height']-layout['screen']) < 1, layout
+                assert abs(layout['top']) < 1, layout
+                assert layout['controlsTop'] >= layout['height']-1, layout
+                assert not layout['overflow'], layout
+                assert layout['rotated'] == (width < height), layout
+                if width > height:
+                    assert abs(layout['mapHeight']-layout['screen']) < 1, layout
+                # Hover hit testing must also work when the map is rotated by CSS.
+                city = page.evaluate('window.WEATHER_MAP.cities[0]')
+                box = page.locator('.map-canvas').bounding_box()
+                u, v = (city['x']+city['w']/2)/1672, (city['y']+city['h']/2)/941
+                if layout['rotated']:
+                    u, v = 1-v, u
+                page.mouse.move(box['x']+u*box['width'], box['y']+v*box['height'])
+                assert page.locator('.map-canvas').get_attribute('title').startswith(city['name'])
+            # Wrapping/enlarging the controls must never reduce the mobile map.
+            page.locator('.map-controls').evaluate('e=>e.style.paddingTop="100px"')
+            page.evaluate('()=>new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done)))')
+            assert abs(page.locator('.map-viewport').bounding_box()['height']-844) < 1
+            assert not errors
+        finally:
+            context.close()
+    context = browser.new_context(viewport={'width': 1366, 'height': 768}, has_touch=False)
+    try:
+        page = context.new_page()
+        page.goto(url)
+        assert 'mobile-map' not in (page.locator('body').get_attribute('class') or '')
+        assert page.locator('.data-source').bounding_box()['y'] < 768
+    finally:
+        context.close()
+
+
 def test_combined_wind_weather_and_curved_legend(browser_site):
     from backend.config import EUROPE_CITIES
     from backend.weather_logic import normalize
@@ -34,14 +93,14 @@ def test_combined_wind_weather_and_curved_legend(browser_site):
             window.bentLayers=new Set();
             const draw=CanvasRenderingContext2D.prototype.drawImage;
             CanvasRenderingContext2D.prototype.drawImage=function(image,...args){
-                if(this.canvas===document.querySelector('main>canvas')&&args.length===8&&
+                if(this.canvas===document.querySelector('.map-canvas')&&args.length===8&&
                    args[3]===1&&image.width>48)window.bentLayers.add(image);
                 return draw.call(this,image,...args);
             };
         }''')
         page.locator('.mode-switch label').filter(has_text='REAL').click()
         expect(page.locator('[data-status]')).to_have_text('REAL: current weather data')
-        label = page.locator('main>canvas').get_attribute('aria-label')
+        label = page.locator('.map-canvas').get_attribute('aria-label')
         assert ': rain + wind' in label and ': snow + wind' in label and ': cloudy + wind' in label
         page.wait_for_function('window.bentLayers.size>=175')
         legend = page.locator('.legend-wind')
@@ -53,9 +112,9 @@ def test_combined_wind_weather_and_curved_legend(browser_site):
         page.locator('.mode-switch label').filter(has_text='DEMO').click()
         page.locator('.mode-switch label').filter(has_text='REAL').click()
         expect(page.locator('[data-status]')).to_have_text('REAL: current weather data')
-        assert '+ wind' not in page.locator('main>canvas').get_attribute('aria-label')
+        assert '+ wind' not in page.locator('.map-canvas').get_attribute('aria-label')
         page.locator('.mode-switch label').filter(has_text='DEMO').click()
-        assert '+ wind' not in page.locator('main>canvas').get_attribute('aria-label')
+        assert '+ wind' not in page.locator('.map-canvas').get_attribute('aria-label')
         assert not errors
     finally:
         context.close()

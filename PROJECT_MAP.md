@@ -27,6 +27,7 @@
 | Изменить широту/долготу или идентичность города | `backend/map-geocoding.json` → запуск `python tools/build_city_map.py` | `backend/map-layout.json` для нового города; `tests/test_europe_map.py` |
 | Добавить или убрать город | `backend/map-layout.json` + `backend/map-geocoding.json` → генерация | `backend/config.py` подхватывает каталог автоматически; обновить тесты с фиксированным количеством городов |
 | Изменить размер Canvas / пропорции карты | `frontend/index.html`, `frontend/style.css`, `frontend/app.js` (коэффициенты масштаба в `specs`) | `tools/build_city_map.py`, `backend/map-layout.json`, `tests/test_europe_map.py` |
+| Масштабирование и мобильный поворот | `frontend/app.js`: `fitMapToScreen`, координаты в `pointermove`; `frontend/style.css`: `.map-viewport`, `.mobile-map`, `.map-rotated` | `frontend/index.html`: обёртка `.map-viewport`; легенда и переключатель вне экранного блока карты |
 | Изменить элементы интерфейса, подписи кнопок, ссылки | `frontend/index.html` | `frontend/app.js`, если меняется поведение |
 | Изменить внешние отступы, ширину страницы, кнопки, раскрывающиеся панели | `frontend/style.css` | `frontend/index.html` |
 | Изменить переключатель DEMO / REAL основной карты | `frontend/app.js`: `modeControls`, `changeMode` | `frontend/index.html`, `frontend/style.css` |
