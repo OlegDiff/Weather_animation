@@ -1,6 +1,23 @@
 
 (()=>{'use strict';
 const root=document.getElementById('weather-map'),canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d');
+function fitMapToScreen(){
+ const bodyStyle=getComputedStyle(document.body);
+ const controls=root.querySelector('.map-controls'),source=root.querySelector('.data-source');
+ const sourceStyle=getComputedStyle(source);
+ const viewportHeight=window.visualViewport?.height??window.innerHeight;
+ const availableHeight=Math.max(1,viewportHeight-parseFloat(bodyStyle.paddingTop)-parseFloat(bodyStyle.paddingBottom)
+  -controls.getBoundingClientRect().height-source.getBoundingClientRect().height
+  -parseFloat(sourceStyle.marginTop)-parseFloat(sourceStyle.marginBottom));
+ const width=Math.min(root.clientWidth,availableHeight*canvas.width/canvas.height);
+ root.style.setProperty('--map-display-width',width+'px');
+}
+window.addEventListener('resize',fitMapToScreen);
+window.visualViewport?.addEventListener('resize',fitMapToScreen);
+const layoutObserver=new ResizeObserver(fitMapToScreen);
+layoutObserver.observe(root.querySelector('.map-controls'));
+layoutObserver.observe(root.querySelector('.data-source'));
+fitMapToScreen();
 // Synthetic geography-based stages; thresholds are visual settings, not forecasts.
 const STAGE_SECONDS=6, FADE_SECONDS=3, SPREAD_SECONDS=0;
 const stageNames=['Snow across Europe','Snow retreats north','More sunshine','Rain and clouds','Snow returns to the north'];
